@@ -40,144 +40,144 @@ OSDefineMetaClassAndStructors(iSCSIInitiatorClient,IOUserClient);
 
 /*! Array of methods that can be called by user-space. */
 const IOExternalMethodDispatch iSCSIInitiatorClient::methods[kiSCSIInitiatorNumMethods] = {
-	{
-		(IOExternalMethodAction) &iSCSIInitiatorClient::OpenInitiator,
-		0,                                  // Scalar input count
-		0,                                  // Structure input size
-		0,                                  // Scalar output count
-		0                                   // Structure output size
-	},
-	{
-		(IOExternalMethodAction) &iSCSIInitiatorClient::CloseInitiator,
-		0,
-		0,
+    {
+        (IOExternalMethodAction) &iSCSIInitiatorClient::OpenInitiator,
+        0,                                  // Scalar input count
+        0,                                  // Structure input size
+        0,                                  // Scalar output count
+        0                                   // Structure output size
+    },
+    {
+        (IOExternalMethodAction) &iSCSIInitiatorClient::CloseInitiator,
         0,
-		0
-	},
-	{
-		(IOExternalMethodAction) &iSCSIInitiatorClient::CreateSession,
-		1,                                  // Number of parameters in struct
-		kIOUCVariableStructureSize,         // Packed parameters for session
-		3,                                  // Returned identifiers, error code
-		0
-	},
-    {
-		(IOExternalMethodAction) &iSCSIInitiatorClient::ReleaseSession,
-		1,                                  // Session ID
-		0,
-		0,
-        0
-	},
-    {
-		(IOExternalMethodAction) &iSCSIInitiatorClient::SetSessionOption,
-		3,                                  // Session ID, option ID, option value
         0,
-		0,
-		0
-	},
-    {
-		(IOExternalMethodAction) &iSCSIInitiatorClient::GetSessionOption,
-		2,                                  // Session ID, option ID
-		0,
-		1,                                  // Option to get
+        0,
         0
-	},
-	{
-		(IOExternalMethodAction) &iSCSIInitiatorClient::CreateConnection,
-		2,                                  // Session ID, number of params
-		kIOUCVariableStructureSize,         // Packed parameters for connection
-		2,                                  // Returned connection identifier, error code
-		0
-	},
-	{
-		(IOExternalMethodAction) &iSCSIInitiatorClient::ReleaseConnection,
-		2,                                  // Session ID, connection ID
-		0,
-		0,
-		0
-	},
+    },
     {
-		(IOExternalMethodAction) &iSCSIInitiatorClient::ActivateConnection,
-		2,                                  // Session ID, connection ID
-		0,
-		0,
-		0
-	},
+        (IOExternalMethodAction) &iSCSIInitiatorClient::CreateSession,
+        1,                                  // Number of parameters in struct
+        kIOUCVariableStructureSize,         // Packed parameters for session
+        3,                                  // Returned identifiers, error code
+        0
+    },
     {
-		(IOExternalMethodAction) &iSCSIInitiatorClient::ActivateAllConnections,
-		1,                                  // Session ID
-		0,
-		0,                                  // Return value
-		0
-	},
-	{
-		(IOExternalMethodAction) &iSCSIInitiatorClient::DeactivateConnection,
-		2,                                  // Session ID, connection ID
-		0,
-		0,                                  // Return value
-		0
-	},
+        (IOExternalMethodAction) &iSCSIInitiatorClient::ReleaseSession,
+        1,                                  // Session ID
+        0,
+        0,
+        0
+    },
     {
-		(IOExternalMethodAction) &iSCSIInitiatorClient::DeactivateAllConnections,
-		1,                                  // Session ID
-		0,
-		0,                                  // Return value
-		0
-	},
-	{
-		(IOExternalMethodAction) &iSCSIInitiatorClient::SendBHS,
-		0,                                  // Session ID, connection ID
-		sizeof(struct __iSCSIPDUCommonBHS), // Buffer to send
-		0,                                  // Return value
-		0
-	},
-	{
-		(IOExternalMethodAction) &iSCSIInitiatorClient::SendData,
+        (IOExternalMethodAction) &iSCSIInitiatorClient::SetSessionOption,
+        3,                                  // Session ID, option ID, option value
+        0,
+        0,
+        0
+    },
+    {
+        (IOExternalMethodAction) &iSCSIInitiatorClient::GetSessionOption,
+        2,                                  // Session ID, option ID
+        0,
+        1,                                  // Option to get
+        0
+    },
+    {
+        (IOExternalMethodAction) &iSCSIInitiatorClient::CreateConnection,
+        2,                                  // Session ID, number of params
+        kIOUCVariableStructureSize,         // Packed parameters for connection
+        2,                                  // Returned connection identifier, error code
+        0
+    },
+    {
+        (IOExternalMethodAction) &iSCSIInitiatorClient::ReleaseConnection,
         2,                                  // Session ID, connection ID
-		kIOUCVariableStructureSize,         // Data is a variable size block
-		0,
-		0
-	},
+        0,
+        0,
+        0
+    },
     {
-		(IOExternalMethodAction) &iSCSIInitiatorClient::RecvBHS,
+        (IOExternalMethodAction) &iSCSIInitiatorClient::ActivateConnection,
         2,                                  // Session ID, connection ID
-		0,
-		0,
-		sizeof(struct __iSCSIPDUCommonBHS), // Receive buffer
-	},
+        0,
+        0,
+        0
+    },
     {
-		(IOExternalMethodAction) &iSCSIInitiatorClient::RecvData,
+        (IOExternalMethodAction) &iSCSIInitiatorClient::ActivateAllConnections,
+        1,                                  // Session ID
+        0,
+        0,                                  // Return value
+        0
+    },
+    {
+        (IOExternalMethodAction) &iSCSIInitiatorClient::DeactivateConnection,
         2,                                  // Session ID, connection ID
-		0,
-		0,
-		kIOUCVariableStructureSize,         // Receive buffer
-	},
+        0,
+        0,                                  // Return value
+        0
+    },
     {
-		(IOExternalMethodAction) &iSCSIInitiatorClient::SetConnectionOption,
+        (IOExternalMethodAction) &iSCSIInitiatorClient::DeactivateAllConnections,
+        1,                                  // Session ID
+        0,
+        0,                                  // Return value
+        0
+    },
+    {
+        (IOExternalMethodAction) &iSCSIInitiatorClient::SendBHS,
+        0,                                  // Session ID, connection ID
+        sizeof(struct __iSCSIPDUCommonBHS), // Buffer to send
+        0,                                  // Return value
+        0
+    },
+    {
+        (IOExternalMethodAction) &iSCSIInitiatorClient::SendData,
+        2,                                  // Session ID, connection ID
+        kIOUCVariableStructureSize,         // Data is a variable size block
+        0,
+        0
+    },
+    {
+        (IOExternalMethodAction) &iSCSIInitiatorClient::RecvBHS,
+        2,                                  // Session ID, connection ID
+        0,
+        0,
+        sizeof(struct __iSCSIPDUCommonBHS), // Receive buffer
+    },
+    {
+        (IOExternalMethodAction) &iSCSIInitiatorClient::RecvData,
+        2,                                  // Session ID, connection ID
+        0,
+        0,
+        kIOUCVariableStructureSize,         // Receive buffer
+    },
+    {
+        (IOExternalMethodAction) &iSCSIInitiatorClient::SetConnectionOption,
         4,                                  // Session ID, connection ID, option ID, option value
         0,
         0,
         0
-	},
+    },
     {
-		(IOExternalMethodAction) &iSCSIInitiatorClient::GetConnectionOption,
+        (IOExternalMethodAction) &iSCSIInitiatorClient::GetConnectionOption,
         3,                                  // Session ID, connection ID, option ID
         0,
         1,                                  // Option to get
         0
-	},
+    },
     {
-		(IOExternalMethodAction) &iSCSIInitiatorClient::GetConnection,
-		1,                                  // Session ID
-		0,
-		1,                                  // Returned connection identifier
+        (IOExternalMethodAction) &iSCSIInitiatorClient::GetConnection,
+        1,                                  // Session ID
+        0,
+        1,                                  // Returned connection identifier
         0
-	},
+    },
     {
-		(IOExternalMethodAction) &iSCSIInitiatorClient::GetNumConnections,
-		1,                                  // Session ID
-		0,
-		1,                                  // Returned number of connections
+        (IOExternalMethodAction) &iSCSIInitiatorClient::GetNumConnections,
+        1,                                  // Session ID
+        0,
+        1,                                  // Returned number of connections
         0
     },
     {
@@ -239,56 +239,56 @@ const IOExternalMethodDispatch iSCSIInitiatorClient::methods[kiSCSIInitiatorNumM
 };
 
 IOReturn iSCSIInitiatorClient::externalMethod(uint32_t selector,
-											  IOExternalMethodArguments * args,
-											  IOExternalMethodDispatch * dispatch,
-											  OSObject * target,
-											  void * ref)
+                                              IOExternalMethodArguments * args,
+                                              IOExternalMethodDispatch * dispatch,
+                                              OSObject * target,
+                                              void * ref)
 {
-	// Sanity check the selector
-	if(selector >= kiSCSIInitiatorNumMethods)
-		return kIOReturnUnsupported;
-	
-	
-	// Call the appropriate function for the current instance of the class
-	return super::externalMethod(selector,
-								 args,
-								 (IOExternalMethodDispatch *)&iSCSIInitiatorClient::methods[selector],
-								 this,
-								 ref);
+    // Sanity check the selector
+    if(selector >= kiSCSIInitiatorNumMethods)
+        return kIOReturnUnsupported;
+
+
+    // Call the appropriate function for the current instance of the class
+    return super::externalMethod(selector,
+                                 args,
+                                 (IOExternalMethodDispatch *)&iSCSIInitiatorClient::methods[selector],
+                                 this,
+                                 ref);
 }
 
 
 // Called as a result of user-space call to IOServiceOpen()
 bool iSCSIInitiatorClient::initWithTask(task_t owningTask,
-										void * securityToken,
-										UInt32 type,
-										OSDictionary * properties)
+                                        void * securityToken,
+                                        UInt32 type,
+                                        OSDictionary * properties)
 {
-	// Save owning task, securty token and type so that we can validate user
-	// as a root user (UID 0) for secure operations (e.g., adding an iSCSI
-	// target requires privileges).
-	this->owningTask = owningTask;
-	this->securityToken = securityToken;
-	this->type = type;
+    // Save owning task, securty token and type so that we can validate user
+    // as a root user (UID 0) for secure operations (e.g., adding an iSCSI
+    // target requires privileges).
+    this->owningTask = owningTask;
+    this->securityToken = securityToken;
+    this->type = type;
     this->accessLock = IOLockAlloc();
-        
-	// Perform any initialization tasks here
-	return super::initWithTask(owningTask,securityToken,type,properties);
+
+    // Perform any initialization tasks here
+    return super::initWithTask(owningTask,securityToken,type,properties);
 }
 
 //Called after initWithTask as a result of call to IOServiceOpen()
 bool iSCSIInitiatorClient::start(IOService * provider)
 {
-	// Check to ensure that the provider is actually an iSCSI initiator
-	if((this->provider = OSDynamicCast(iSCSIVirtualHBA,provider)) == NULL)
-		return false;
+    // Check to ensure that the provider is actually an iSCSI initiator
+    if((this->provider = OSDynamicCast(iSCSIVirtualHBA,provider)) == NULL)
+        return false;
 
-	return super::start(provider);
+    return super::start(provider);
 }
 
 void iSCSIInitiatorClient::stop(IOService * provider)
 {
-	super::stop(provider);
+    super::stop(provider);
 }
 
 // Called as a result of user-space call to IOServiceClose()
@@ -296,20 +296,20 @@ IOReturn iSCSIInitiatorClient::clientClose()
 {
     // Tell HBA to release any resources that aren't active (e.g.,
     // connections we started to establish but didn't activate)
-    
-	// Ensure that the connection has been closed (in case the user calls
-	// IOServiceClose() before calling our close() method
-	close();
-    
+
+    // Ensure that the connection has been closed (in case the user calls
+    // IOServiceClose() before calling our close() method
+    close();
+
     if(accessLock) {
         IOLockFree(accessLock);
         accessLock = NULL;
     }
-	
-	// Terminate ourselves
-	terminate();
-	
-	return kIOReturnSuccess;
+
+    // Terminate ourselves
+    terminate();
+
+    return kIOReturnSuccess;
 }
 
 // Called if the user-space client is terminated without calling
@@ -318,11 +318,11 @@ IOReturn iSCSIInitiatorClient::clientDied()
 {
     // Tell HBA to release any resources that aren't active (e.g.,
     // connections we started to establish but didn't activate)
-    
+
     // Close the provider (decrease retain count)
     close();
-    
-	return super::clientDied();
+
+    return super::clientDied();
 }
 
 /*! Invoked when a user-space application registers a notification port
@@ -346,14 +346,14 @@ IOReturn iSCSIInitiatorClient::sendNotification(iSCSIKernelNotificationMessage *
 {
     if(notificationPort == MACH_PORT_NULL)
         return kIOReturnNotOpen;
-    
+
     message->header.msgh_bits = MACH_MSGH_BITS(MACH_MSG_TYPE_COPY_SEND,0);
     message->header.msgh_size = sizeof(message);
     message->header.msgh_remote_port = notificationPort;
     message->header.msgh_local_port = MACH_PORT_NULL;
     message->header.msgh_reserved = 0;
     message->header.msgh_id = 0;
-    
+
     mach_msg_send_from_kernel_proper(&message->header,sizeof(message));
     return kIOReturnSuccess;
 }
@@ -373,7 +373,7 @@ IOReturn iSCSIInitiatorClient::sendAsyncMessageNotification(SID sessionId,
     message.asyncEvent = event;
     message.sessionId = sessionId;
     message.connectionId = connectionId;
-    
+
     return sendNotification((iSCSIKernelNotificationMessage*)&message);
 }
 
@@ -384,45 +384,45 @@ IOReturn iSCSIInitiatorClient::sendTerminateMessageNotification()
 {
     iSCSIKernelNotificationMessage message;
     message.notificationType = kISCSIKernelNotificationTerminate;
-    
+
     return sendNotification(&message);
 }
 
 // Invoked from user space remotely by calling iSCSIInitiatorOpen()
 IOReturn iSCSIInitiatorClient::open()
 {
-	// Ensure that we are attached to a provider
-	if(isInactive() || provider == NULL)
-		return kIOReturnNotAttached;
-	
-	// Open the provider (iSCSIInitiator) for this this client
-	if(provider->open(this))
-		return kIOReturnSuccess;
-    
-	// At this point we couldn't open the client for the provider for some
-	// other reason
-	return kIOReturnNotOpen;
+    // Ensure that we are attached to a provider
+    if(isInactive() || provider == NULL)
+        return kIOReturnNotAttached;
+
+    // Open the provider (iSCSIInitiator) for this this client
+    if(provider->open(this))
+        return kIOReturnSuccess;
+
+    // At this point we couldn't open the client for the provider for some
+    // other reason
+    return kIOReturnNotOpen;
 }
 
 // Invoked from user space remotely by calling iSCSIInitiatorClose()
 IOReturn iSCSIInitiatorClient::close()
 {
-	// If we're not active or have no provider we're not attached
-	if(isInactive() || provider == NULL)
-		return kIOReturnNotAttached;
-	
-	// If the provider isn't open for us then return not open
-	else if(!provider->isOpen(this))
-		return kIOReturnNotOpen;
+    // If we're not active or have no provider we're not attached
+    if(isInactive() || provider == NULL)
+        return kIOReturnNotAttached;
 
-	// At this point we're attached & open, close the connection
-	provider->close(this);
-	
-	return kIOReturnSuccess;
+    // If the provider isn't open for us then return not open
+    else if(!provider->isOpen(this))
+        return kIOReturnNotOpen;
+
+    // At this point we're attached & open, close the connection
+    provider->close(this);
+
+    return kIOReturnSuccess;
 }
 
 /*! Dispatched function called from the device interface to this user
- *	client .*/
+ *  client .*/
 IOReturn iSCSIInitiatorClient::OpenInitiator(iSCSIInitiatorClient * target,
                                              void * reference,
                                              IOExternalMethodArguments * args)
@@ -431,7 +431,7 @@ IOReturn iSCSIInitiatorClient::OpenInitiator(iSCSIInitiatorClient * target,
 }
 
 /*! Dispatched function called from the device interface to this user
- *	client .*/
+ *  client .*/
 IOReturn iSCSIInitiatorClient::CloseInitiator(iSCSIInitiatorClient * target,
                                               void * reference,
                                               IOExternalMethodArguments * args)
@@ -447,51 +447,51 @@ IOReturn iSCSIInitiatorClient::CreateSession(iSCSIInitiatorClient * target,
     // Create a new session and return session ID
     SID sessionId;
     CID connectionId;
-    
+
     // Unpack the struct to get targetIQN, portalAddress, etc.
     UInt64 kNumParams = *args->scalarInput;
-    
+
     // We expect six input arguments to CreateSession...
     if(kNumParams < 6)
         return kIOReturnBadArgument;
-    
+
     void * params[kNumParams];
     size_t paramSize[kNumParams];
     size_t header = sizeof(UInt64*)*kNumParams;
     UInt8 * inputPos = ((UInt8*)args->structureInput)+header;
-    
+
     for(int idx = 0; idx < kNumParams; idx++) {
         paramSize[idx] = ((UInt64*)args->structureInput)[idx];
         params[idx] = inputPos;
         inputPos += paramSize[idx];
     }
-    
+
     OSString * targetIQN = OSString::withCString((const char *)params[0]);
     OSString * portalAddress = OSString::withCString((const char *)params[1]);
     OSString * portalPort = OSString::withCString((const char *)params[2]);
     OSString * hostInterface = OSString::withCString((const char *)params[3]);
     const sockaddr_storage * portalSockAddr = (struct sockaddr_storage*)params[4];
     const sockaddr_storage * hostSockAddr = (struct sockaddr_storage*)params[5];
- 
+
     IOLockLock(target->accessLock);
-    
+
     // Create a connection
     errno_t error = target->provider->CreateSession(
         targetIQN,portalAddress,portalPort,hostInterface,portalSockAddr,
         hostSockAddr,&sessionId,&connectionId);
-    
+
     IOLockUnlock(target->accessLock);
-    
+
     args->scalarOutput[0] = sessionId;
     args->scalarOutput[1] = connectionId;
     args->scalarOutput[2] = error;
     args->scalarOutputCount = 3;
-    
+
     targetIQN->release();
     portalAddress->release();
     portalPort->release();
     hostInterface->release();
-    
+
     return kIOReturnSuccess;
 }
 
@@ -504,7 +504,7 @@ IOReturn iSCSIInitiatorClient::ReleaseSession(iSCSIInitiatorClient * target,
     IOLockLock(target->accessLock);
     target->provider->ReleaseSession(*args->scalarInput);
     IOLockUnlock(target->accessLock);
-    
+
     return kIOReturnSuccess;
 }
 
@@ -514,25 +514,25 @@ IOReturn iSCSIInitiatorClient::SetSessionOption(iSCSIInitiatorClient * target,
                                                 IOExternalMethodArguments * args)
 {
     iSCSIVirtualHBA * hba = OSDynamicCast(iSCSIVirtualHBA,target->provider);
-    
+
     if(args->scalarInputCount != 3)
         return kIOReturnBadArgument;
-    
+
     SID sessionId = (SID)args->scalarInput[0];
     enum iSCSIKernelSessionOptTypes optType = (enum iSCSIKernelSessionOptTypes)args->scalarInput[1];
     UInt64 optVal = args->scalarInput[2];
-    
+
     // Range-check input
     if(sessionId >= kiSCSIMaxSessions)
         return kIOReturnBadArgument;
- 
+
     IOLockLock(target->accessLock);
-    
+
     // Do nothing if session doesn't exist
     iSCSISession * session = hba->sessionList[sessionId];
-    
+
     IOReturn retVal = kIOReturnSuccess;
-    
+
     if(session)
     {
         switch(optType)
@@ -584,7 +584,7 @@ IOReturn iSCSIInitiatorClient::SetSessionOption(iSCSIInitiatorClient * target,
     else {
         retVal = kIOReturnBadArgument;
     }
-    
+
     IOLockUnlock(target->accessLock);
     return retVal;
 }
@@ -594,27 +594,27 @@ IOReturn iSCSIInitiatorClient::GetSessionOption(iSCSIInitiatorClient * target,
                                                 IOExternalMethodArguments * args)
 {
     iSCSIVirtualHBA * hba = OSDynamicCast(iSCSIVirtualHBA,target->provider);
-    
-    
+
+
     if(args->scalarInputCount != 2)
         return kIOReturnBadArgument;
-    
+
     SID sessionId = (SID)args->scalarInput[0];
     enum iSCSIKernelSessionOptTypes optType = (enum iSCSIKernelSessionOptTypes)args->scalarInput[1];
-    
+
     // Range-check input
     if(sessionId >= kiSCSIMaxSessions)
         return kIOReturnBadArgument;
-    
+
     IOLockLock(target->accessLock);
-    
+
     // Do nothing if session doesn't exist
     iSCSISession * session = hba->sessionList[sessionId];
-    
+
     IOReturn retVal = kIOReturnSuccess;
-    
+
     UInt64 * optVal = args->scalarOutput;
-    
+
     if(session)
     {
         switch(optType)
@@ -665,7 +665,7 @@ IOReturn iSCSIInitiatorClient::GetSessionOption(iSCSIInitiatorClient * target,
     else {
         retVal = kIOReturnNotFound;
     }
-    
+
     IOLockUnlock(target->accessLock);
     return retVal;
 }
@@ -677,40 +677,40 @@ IOReturn iSCSIInitiatorClient::CreateConnection(iSCSIInitiatorClient * target,
 {
     SID sessionId = (SID)args->scalarInput[0];
     CID connectionId;
-    
+
     // Unpack the struct to get targetIQN, portalAddress, etc.
     UInt64 kNumParams = args->scalarInput[1];
-    
+
     // We expect six input arguments to CreateSession...
     if(kNumParams < 5)
         return kIOReturnBadArgument;
-    
+
     void * params[kNumParams];
     size_t paramSize[kNumParams];
     size_t header = sizeof(UInt64*)*kNumParams;
     UInt8 * inputPos = ((UInt8*)args->structureInput)+header;
-    
+
     for(int idx = 0; idx < kNumParams; idx++) {
         paramSize[idx] = ((UInt64*)args->structureInput)[idx];
         params[idx] = inputPos;
         inputPos += paramSize[idx];
     }
-    
+
     OSString * portalAddress = OSString::withCString((const char *)params[0]);
     OSString * portalPort = OSString::withCString((const char *)params[1]);
     OSString * hostInterface = OSString::withCString((const char *)params[2]);
     const sockaddr_storage * portalSockAddr = (struct sockaddr_storage*)params[3];
     const sockaddr_storage * hostSockAddr = (struct sockaddr_storage*)params[4];
-    
+
     IOLockLock(target->accessLock);
-    
+
     // Create a connection
     errno_t error = target->provider->CreateConnection(
             sessionId,portalAddress,portalPort,hostInterface,portalSockAddr,
             hostSockAddr,&connectionId);
-    
+
     IOLockUnlock(target->accessLock);
-    
+
     args->scalarOutput[0] = connectionId;
     args->scalarOutput[1] = error;
     args->scalarOutputCount = 2;
@@ -752,7 +752,7 @@ IOReturn iSCSIInitiatorClient::ActivateAllConnections(iSCSIInitiatorClient * tar
 
     *args->scalarOutput =
         target->provider->ActivateAllConnections((SID)args->scalarInput[0]);
-    
+
     IOLockUnlock(target->accessLock);
     return kIOReturnSuccess;
 }
@@ -762,11 +762,11 @@ IOReturn iSCSIInitiatorClient::DeactivateConnection(iSCSIInitiatorClient * targe
                                                     IOExternalMethodArguments * args)
 {
     IOLockLock(target->accessLock);
-    
+
     *args->scalarOutput =
         target->provider->DeactivateConnection((SID)args->scalarInput[0],
                                                (CID)args->scalarInput[1]);
-    
+
     IOLockUnlock(target->accessLock);
     return kIOReturnSuccess;
 }
@@ -776,10 +776,10 @@ IOReturn iSCSIInitiatorClient::DeactivateAllConnections(iSCSIInitiatorClient * t
                                                         IOExternalMethodArguments * args)
 {
     IOLockLock(target->accessLock);
-    
+
     *args->scalarOutput =
         target->provider->DeactivateAllConnections((SID)args->scalarInput[0]);
-    
+
     IOLockUnlock(target->accessLock);
     return kIOReturnSuccess;
 }
@@ -793,11 +793,11 @@ IOReturn iSCSIInitiatorClient::SendBHS(iSCSIInitiatorClient * target,
     // Validate input
     if(args->structureInputSize != kiSCSIPDUBasicHeaderSegmentSize)
         return kIOReturnNoSpace;
-    
+
     IOLockLock(target->accessLock);
     memcpy(&target->bhsBuffer,args->structureInput,kiSCSIPDUBasicHeaderSegmentSize);
     IOLockUnlock(target->accessLock);
-    
+
     return kIOReturnSuccess;
 }
 
@@ -808,38 +808,38 @@ IOReturn iSCSIInitiatorClient::SendData(iSCSIInitiatorClient * target,
                                         IOExternalMethodArguments * args)
 {
     iSCSIVirtualHBA * hba = OSDynamicCast(iSCSIVirtualHBA,target->provider);
-    
+
     SID sessionId = (SID)args->scalarInput[0];
     CID connectionId = (CID)args->scalarInput[1];
-    
+
     // Range-check input
     if(sessionId >= kiSCSIMaxSessions || connectionId >= kiSCSIMaxConnectionsPerSession)
         return kIOReturnBadArgument;
-    
+
     IOLockLock(target->accessLock);
 
     // Do nothing if session doesn't exist
     iSCSISession * session = hba->sessionList[sessionId];
     iSCSIConnection * connection = NULL;
-    
+
     if(session)
         connection = session->connections[connectionId];
-    
+
     const void * data = args->structureInput;
     size_t length = args->structureInputSize;
-    
+
     // Send data and return the result
     IOReturn retVal = kIOReturnNotFound;
-    
+
     if(connection) {
         if(hba->SendPDU(session,connection,&(target->bhsBuffer),nullptr,data,length))
             retVal = kIOReturnError;
         else
             retVal = kIOReturnSuccess;
     }
-    
+
     IOLockUnlock(target->accessLock);
-    
+
     return retVal;
 }
 
@@ -853,30 +853,30 @@ IOReturn iSCSIInitiatorClient::RecvBHS(iSCSIInitiatorClient * target,
     // Verify user-supplied buffer is large enough to hold BHS
     if(args->structureOutputSize != kiSCSIPDUBasicHeaderSegmentSize)
         return kIOReturnNoSpace;
-    
+
     iSCSIVirtualHBA * hba = OSDynamicCast(iSCSIVirtualHBA,target->provider);
-    
+
     SID sessionId = (SID)args->scalarInput[0];
     CID connectionId = (CID)args->scalarInput[1];
-    
+
     // Range-check input
     if(sessionId >= kiSCSIMaxSessions || connectionId >= kiSCSIMaxConnectionsPerSession)
         return kIOReturnBadArgument;
-    
+
     IOLockLock(target->accessLock);
-    
+
     // Do nothing if session doesn't exist
     iSCSISession * session = hba->sessionList[sessionId];
     iSCSIConnection * connection = NULL;
-    
+
     if(session)
         connection = session->connections[connectionId];
-    
+
     // Receive data and return the result
     IOReturn retVal = kIOReturnNotFound;
-    
+
     iSCSIPDUTargetBHS * bhs = (iSCSIPDUTargetBHS*)args->structureOutput;
-    
+
     if(connection) {
         if(hba->RecvPDUHeader(session,connection,bhs,MSG_WAITALL))
             retVal = kIOReturnIOError;
@@ -897,26 +897,26 @@ IOReturn iSCSIInitiatorClient::RecvData(iSCSIInitiatorClient * target,
                                         IOExternalMethodArguments * args)
 {
     iSCSIVirtualHBA * hba = OSDynamicCast(iSCSIVirtualHBA,target->provider);
-    
+
     SID sessionId = (SID)args->scalarInput[0];
     CID connectionId = (CID)args->scalarInput[1];
-    
+
     // Range-check input
     if(sessionId >= kiSCSIMaxSessions || connectionId >= kiSCSIMaxConnectionsPerSession)
         return kIOReturnBadArgument;
-    
+
     IOLockLock(target->accessLock);
-    
+
     // Do nothing if session doesn't exist
     iSCSISession * session = hba->sessionList[sessionId];
     iSCSIConnection * connection = NULL;
-    
+
     if(session)
         connection = session->connections[connectionId];
-    
+
     // Receive data and return the result
     IOReturn retVal = kIOReturnNotFound;
-    
+
     void * data = (void *)args->structureOutput;
     size_t length = args->structureOutputSize;
 
@@ -924,9 +924,9 @@ IOReturn iSCSIInitiatorClient::RecvData(iSCSIInitiatorClient * target,
         retVal = kIOReturnIOError;
     else
         retVal = kIOReturnSuccess;
-    
+
     IOLockUnlock(target->accessLock);
-    
+
     return retVal;
 }
 
@@ -937,35 +937,35 @@ IOReturn iSCSIInitiatorClient::SetConnectionOption(iSCSIInitiatorClient * target
                                                    IOExternalMethodArguments * args)
 {
     iSCSIVirtualHBA * hba = OSDynamicCast(iSCSIVirtualHBA,target->provider);
-    
+
     if(args->scalarInputCount != 4)
         return kIOReturnBadArgument;
-    
+
     SID sessionId = (SID)args->scalarInput[0];
     CID connectionId = (CID)args->scalarInput[1];
     enum iSCSIKernelConnectionOptTypes optType = (enum iSCSIKernelConnectionOptTypes)args->scalarInput[2];
     UInt64 optVal = args->scalarInput[3];
-    
+
     // Range-check input
     if(sessionId >= kiSCSIMaxSessions || connectionId >= kiSCSIMaxConnectionsPerSession)
         return kIOReturnBadArgument;
-    
+
     IOLockLock(target->accessLock);
-    
+
     // Do nothing if session doesn't exist
     iSCSISession * session = hba->sessionList[sessionId];
     iSCSIConnection * connection = NULL;
-    
+
     if(session)
         connection = session->connections[connectionId];
-    
+
     // Receive data and return the result
     IOReturn retVal = kIOReturnNotFound;
 
     if(connection)
     {
         retVal = kIOReturnSuccess;
-        
+
         switch(optType)
         {
             case kiSCSIKernelCOIFMarkInt:
@@ -995,14 +995,14 @@ IOReturn iSCSIInitiatorClient::SetConnectionOption(iSCSIInitiatorClient * target
             case kiSCSIKernelCOInitialExpStatSN:
                 connection->expStatSN = (UInt32)optVal;
                 break;
-                
+
             default:
                 retVal = kIOReturnBadArgument;
         };
     }
-    
+
     IOLockUnlock(target->accessLock);
-    
+
     return retVal;
 }
 
@@ -1011,34 +1011,34 @@ IOReturn iSCSIInitiatorClient::GetConnectionOption(iSCSIInitiatorClient * target
                                                    IOExternalMethodArguments * args)
 {
     iSCSIVirtualHBA * hba = OSDynamicCast(iSCSIVirtualHBA,target->provider);
-    
+
     if(args->scalarInputCount != 3)
         return kIOReturnBadArgument;
-    
+
     SID sessionId = (SID)args->scalarInput[0];
     CID connectionId = (CID)args->scalarInput[1];
     enum iSCSIKernelConnectionOptTypes optType = (enum iSCSIKernelConnectionOptTypes)args->scalarInput[2];
     UInt64 * optVal = args->scalarOutput;
-    
+
     // Range-check input
     if(sessionId >= kiSCSIMaxSessions || connectionId >= kiSCSIMaxConnectionsPerSession)
         return kIOReturnBadArgument;
-    
+
     IOLockLock(target->accessLock);
-    
+
     // Do nothing if session doesn't exist
     iSCSISession * session = hba->sessionList[sessionId];
     iSCSIConnection * connection = NULL;
-    
+
     if(session)
         connection = session->connections[connectionId];
-    
+
     // Receive data and return the result
     IOReturn retVal = kIOReturnNotFound;
 
     if(connection) {
         retVal = kIOReturnSuccess;
-    
+
         switch(optType)
         {
             case kiSCSIKernelCOIFMarkInt:
@@ -1068,14 +1068,14 @@ IOReturn iSCSIInitiatorClient::GetConnectionOption(iSCSIInitiatorClient * target
             case kiSCSIKernelCOInitialExpStatSN:
                 *optVal = connection->expStatSN;
                 break;
-                
+
             default:
                 return kIOReturnBadArgument;
         };
     }
-    
+
     IOLockUnlock(target->accessLock);
-    
+
     return retVal;
 }
 
@@ -1084,27 +1084,27 @@ IOReturn iSCSIInitiatorClient::GetConnection(iSCSIInitiatorClient * target,
                                              IOExternalMethodArguments * args)
 {
     iSCSIVirtualHBA * hba = OSDynamicCast(iSCSIVirtualHBA,target->provider);
-    
+
     SID sessionId = (SID)args->scalarInput[0];
-    
+
     // Range-check input
     if(sessionId >= kiSCSIMaxSessions)
         return kIOReturnBadArgument;
-    
+
     IOLockLock(target->accessLock);
-    
+
     iSCSISession * session = hba->sessionList[sessionId];
     IOReturn retVal = kIOReturnNotFound;
-    
+
     if(session) {
-        
+
         retVal = kIOReturnSuccess;
-        
+
         args->scalarOutputCount = 1;
         CID * connectionId = (CID *)args->scalarOutput;
-        
+
         *connectionId = kiSCSIInvalidConnectionId;
-        
+
         for(CID connectionIdx = 0; connectionIdx < kiSCSIMaxConnectionsPerSession; connectionIdx++)
         {
             if(session->connections[connectionIdx])
@@ -1114,9 +1114,9 @@ IOReturn iSCSIInitiatorClient::GetConnection(iSCSIInitiatorClient * target,
             }
         }
     }
-    
+
     IOLockUnlock(target->accessLock);
-    
+
     return retVal;
 }
 
@@ -1125,29 +1125,29 @@ IOReturn iSCSIInitiatorClient::GetNumConnections(iSCSIInitiatorClient * target,
                                                  IOExternalMethodArguments * args)
 {
     iSCSIVirtualHBA * hba = OSDynamicCast(iSCSIVirtualHBA,target->provider);
-    
+
     SID sessionId = (SID)args->scalarInput[0];
-    
+
     // Range-check input
     if(sessionId >= kiSCSIMaxSessions)
         return kIOReturnBadArgument;
-    
+
     IOLockLock(target->accessLock);
-    
+
     iSCSISession * session = hba->sessionList[sessionId];
     IOReturn retVal = kIOReturnNotFound;
     CID connectionCount = 0;
-    
+
     if(session) {
         // Iterate over list of connections to see how many are valid
         for(CID connectionId = 0; connectionId < kiSCSIMaxConnectionsPerSession; connectionId++)
             if(session->connections[connectionId])
                 connectionCount++;
     }
-    
+
     *args->scalarOutput = connectionCount;
     args->scalarOutputCount = 1;
-    
+
     IOLockUnlock(target->accessLock);
 
     return retVal;
@@ -1158,14 +1158,14 @@ IOReturn iSCSIInitiatorClient::GetSessionIdForTargetIQN(iSCSIInitiatorClient * t
                                                          IOExternalMethodArguments * args)
 {
     iSCSIVirtualHBA * hba = OSDynamicCast(iSCSIVirtualHBA,target->provider);
-    
+
     const char * targetIQN = (const char *)args->structureInput;
-    
+
     IOLockLock(target->accessLock);
     OSNumber * identifier = (OSNumber*)(hba->targetList->getObject(targetIQN));
-    
+
     IOReturn retVal = kIOReturnNotFound;
-    
+
     if(identifier) {
         retVal = kIOReturnSuccess;
         *args->scalarOutput = identifier->unsigned16BitValue();;
@@ -1173,7 +1173,7 @@ IOReturn iSCSIInitiatorClient::GetSessionIdForTargetIQN(iSCSIInitiatorClient * t
     }
 
     IOLockUnlock(target->accessLock);
-    
+
     return retVal;
 }
 
@@ -1182,53 +1182,53 @@ IOReturn iSCSIInitiatorClient::GetConnectionIdForPortalAddress(iSCSIInitiatorCli
                                                           IOExternalMethodArguments * args)
 {
     iSCSIVirtualHBA * hba = OSDynamicCast(iSCSIVirtualHBA,target->provider);
-    
+
     SID sessionId = (SID)args->scalarInput[0];
 
     // Range-check input
     if(sessionId == kiSCSIInvalidSessionId)
         return kIOReturnBadArgument;
-    
+
     IOLockLock(target->accessLock);
 
     iSCSISession * session = hba->sessionList[sessionId];
     IOReturn retVal = kIOReturnNotFound;
-    
+
     if(session) {
-    
+
         retVal = kIOReturnBadArgument;
-        
+
         OSString * portalAddress = OSString::withCString((const char *)args->structureInput);
-        
+
         if(portalAddress)
         {
             retVal = kIOReturnNotFound;
-            
+
             iSCSIConnection * connection = NULL;
-            
+
             *args->scalarOutput = kiSCSIInvalidConnectionId;
             args->scalarOutputCount = 1;
-            
+
             // Iterate over connections to find a matching address structure
             for(CID connectionId = 0; connectionId < kiSCSIMaxConnectionsPerSession; connectionId++)
             {
                 if(!(connection = session->connections[connectionId]))
                     continue;
-                
+
                 if(!connection->portalAddress->isEqualTo(portalAddress))
                     continue;
-                
+
                 *args->scalarOutput = connectionId;
                 args->scalarOutputCount = 1;
-                    
+
                 retVal = kIOReturnSuccess;
                 break;
             }
         }
     }
-    
+
     IOLockUnlock(target->accessLock);
-    
+
     return retVal;
 }
 
@@ -1238,14 +1238,14 @@ IOReturn iSCSIInitiatorClient::GetSessionIds(iSCSIInitiatorClient * target,
 {
     if(args->structureOutputSize < sizeof(SID)*kiSCSIMaxSessions)
         return kIOReturnBadArgument;
-    
+
     iSCSIVirtualHBA * hba = OSDynamicCast(iSCSIVirtualHBA,target->provider);
-    
+
     SID sessionCount = 0;
     SID * sessionIds = (SID *)args->structureOutput;
-    
+
     IOLockLock(target->accessLock);
-    
+
     for(SID sessionIdx = 0; sessionIdx < kiSCSIMaxSessions; sessionIdx++)
     {
         if(hba->sessionList[sessionIdx])
@@ -1257,7 +1257,7 @@ IOReturn iSCSIInitiatorClient::GetSessionIds(iSCSIInitiatorClient * target,
 
     args->scalarOutputCount = 1;
     *args->scalarOutput = sessionCount;
-    
+
     IOLockUnlock(target->accessLock);
 
     return  kIOReturnSuccess;
@@ -1271,25 +1271,25 @@ IOReturn iSCSIInitiatorClient::GetConnectionIds(iSCSIInitiatorClient * target,
         return kIOReturnBadArgument;
 
     iSCSIVirtualHBA * hba = OSDynamicCast(iSCSIVirtualHBA,target->provider);
-    
+
     SID sessionId = (SID)args->scalarInput[0];
-    
+
     // Range-check input
     if(sessionId >= kiSCSIMaxSessions)
         return kIOReturnBadArgument;
-    
+
     IOLockLock(target->accessLock);
 
     iSCSISession * session = hba->sessionList[sessionId];
     IOReturn retVal = kIOReturnNotFound;
-    
+
     if(session)
     {
         retVal = kIOReturnSuccess;
 
         CID connectionCount = 0;
         CID * connectionIds = (CID *)args->structureOutput;
-        
+
         // Find an empty connection slot to use for a new connection
         for(CID index = 0; index < kiSCSIMaxConnectionsPerSession; index++)
         {
@@ -1299,7 +1299,7 @@ IOReturn iSCSIInitiatorClient::GetConnectionIds(iSCSIInitiatorClient * target,
                 connectionCount++;
             }
         }
-        
+
         args->scalarOutputCount = 1;
         *args->scalarOutput = connectionCount;
     }
@@ -1314,25 +1314,25 @@ IOReturn iSCSIInitiatorClient::GetTargetIQNForSessionId(iSCSIInitiatorClient * t
                                                          IOExternalMethodArguments * args)
 {
     iSCSIVirtualHBA * hba = OSDynamicCast(iSCSIVirtualHBA,target->provider);
-    
+
     SID sessionId = (SID)args->scalarInput[0];
-    
+
     // Range-check input
     if(sessionId >= kiSCSIMaxSessions)
         return kIOReturnBadArgument;
-    
+
     IOLockLock(target->accessLock);
-    
+
     iSCSISession * session = hba->sessionList[sessionId];
     IOReturn retVal = kIOReturnNotFound;
-    
+
     // Iterate over list of target name and find a matching session identifier
     OSCollectionIterator * iterator = OSCollectionIterator::withCollection(hba->targetList);
-    
+
     if(session && iterator)
     {
         OSObject * object;
-        
+
         while((object = iterator->getNextObject()))
         {
             OSString * targetIQN = OSDynamicCast(OSString,object);
@@ -1350,7 +1350,7 @@ IOReturn iSCSIInitiatorClient::GetTargetIQNForSessionId(iSCSIInitiatorClient * t
             }
         }
     }
-    
+
     IOLockUnlock(target->accessLock);
 
     OSSafeRelease(iterator);
@@ -1362,36 +1362,36 @@ IOReturn iSCSIInitiatorClient::GetPortalAddressForConnectionId(iSCSIInitiatorCli
                                                          IOExternalMethodArguments * args)
 {
     iSCSIVirtualHBA * hba = OSDynamicCast(iSCSIVirtualHBA,target->provider);
-    
+
     SID sessionId = (SID)args->scalarInput[0];
     CID connectionId = (CID)args->scalarInput[1];
-    
+
     // Range-check input
     if(sessionId >= kiSCSIMaxSessions || connectionId >= kiSCSIMaxConnectionsPerSession)
         return kIOReturnBadArgument;
-    
+
     IOLockLock(target->accessLock);
-    
+
     // Do nothing if session doesn't exist
     iSCSISession * session = hba->sessionList[sessionId];
     iSCSIConnection * connection = NULL;
-    
+
     if(session)
         connection = session->connections[connectionId];
-    
+
     // Receive data and return the result
     IOReturn retVal = kIOReturnNotFound;
-    
+
     if(connection) {
         retVal = kIOReturnSuccess;
-        
+
         const char * portalAddress = connection->portalAddress->getCStringNoCopy();
         size_t portalAddressLength = connection->portalAddress->getLength();
-        
+
         memset(args->structureOutput,0,args->structureOutputSize);
         memcpy(args->structureOutput,portalAddress,min(args->structureOutputSize,portalAddressLength));
     }
-    
+
     IOLockUnlock(target->accessLock);
     return retVal;
 }
@@ -1401,36 +1401,36 @@ IOReturn iSCSIInitiatorClient::GetPortalPortForConnectionId(iSCSIInitiatorClient
                                                             IOExternalMethodArguments * args)
 {
     iSCSIVirtualHBA * hba = OSDynamicCast(iSCSIVirtualHBA,target->provider);
-    
+
     SID sessionId = (SID)args->scalarInput[0];
     CID connectionId = (CID)args->scalarInput[1];
-    
+
     // Range-check input
     if(sessionId >= kiSCSIMaxSessions || connectionId >= kiSCSIMaxConnectionsPerSession)
         return kIOReturnBadArgument;
-    
+
     IOLockLock(target->accessLock);
-    
+
     // Do nothing if session doesn't exist
     iSCSISession * session = hba->sessionList[sessionId];
     iSCSIConnection * connection = NULL;
-    
+
     if(session)
         connection = session->connections[connectionId];
-    
+
     // Receive data and return the result
     IOReturn retVal = kIOReturnNotFound;
-    
+
     if(connection) {
         retVal = kIOReturnSuccess;
-        
+
         const char * portalPort = connection->portalPort->getCStringNoCopy();
         size_t portalPortLength = connection->portalPort->getLength();
-    
+
         memset(args->structureOutput,0,args->structureOutputSize);
         memcpy(args->structureOutput,portalPort,min(args->structureOutputSize,portalPortLength));
     }
-    
+
     IOLockUnlock(target->accessLock);
     return retVal;
 }
@@ -1440,37 +1440,37 @@ IOReturn iSCSIInitiatorClient::GetHostInterfaceForConnectionId(iSCSIInitiatorCli
                                                                IOExternalMethodArguments * args)
 {
     iSCSIVirtualHBA * hba = OSDynamicCast(iSCSIVirtualHBA,target->provider);
-    
+
     SID sessionId = (SID)args->scalarInput[0];
     CID connectionId = (CID)args->scalarInput[1];
-    
+
     // Range-check input
     if(sessionId >= kiSCSIMaxSessions || connectionId >= kiSCSIMaxConnectionsPerSession)
         return kIOReturnBadArgument;
-    
+
     IOLockLock(target->accessLock);
-    
+
     // Do nothing if session doesn't exist
     iSCSISession * session = hba->sessionList[sessionId];
     iSCSIConnection * connection = NULL;
-    
+
     if(session)
         connection = session->connections[connectionId];
-    
+
     // Receive data and return the result
     IOReturn retVal = kIOReturnNotFound;
-    
+
     if(connection) {
         retVal = kIOReturnSuccess;
-        
+
         const char * hostInterface = connection->hostInteface->getCStringNoCopy();
         size_t hostInterfaceLength = connection->hostInteface->getLength();
-    
+
         memcpy(args->structureOutput,hostInterface,min(args->structureOutputSize,hostInterfaceLength+1));
     }
-    
+
     IOLockUnlock(target->accessLock);
-    
+
     return retVal;
 }
 

@@ -47,42 +47,42 @@
 
 /*! Notification types send from the kernel to the user-space daemon. */
 enum iSCSIKernelNotificationTypes {
-    
+
     /*! An asynchronous iSCSI message. */
     kiSCSIKernelNotificationAsyncMessage,
-    
+
     /*! Notifies clients that the kernel extension or controller is going
      *  shut down.  Clients should release all resources. */
     kISCSIKernelNotificationTerminate,
-    
+
     /*! Invalid notification message. */
     kiSCSIKernelNotificationInvalid
 };
 
 
 /*! Used to pass notifications from the kernel to the user-space daemon.
- *  The notification type is one of the notification types listed in 
+ *  The notification type is one of the notification types listed in
  *  the enumerated type iSCSINotificationTypes. */
 typedef struct {
-    
+
     /*! Message haeder. */
     mach_msg_header_t header;
-    
+
     /*! The notification type. */
     UInt8 notificationType;
-    
+
     /*! Parameter associated with the notification (notificiation-specific). */
     UInt64 parameter1;
-    
+
     /*! Parameter associated with the notification (notificiation-specific). */
     UInt64 parameter2;
-    
+
     /*! Session identifier. */
     SID sessionId;
-    
+
     /*! Connection identifier. */
     CID connectionId;
-    
+
 } iSCSIKernelNotificationMessage;
 
 
@@ -90,32 +90,32 @@ typedef struct {
  *  The notification type is one of the notification types listed in
  *  the enumerated type iSCSINotificationTypes. */
 typedef struct {
-    
+
     /*! The notification type. */
     UInt8 notificationType;
-    
+
     /*! An asynchronous event code, see iSCSIPDUAsyncEvent. */
     UInt64 asyncEvent;
-    
+
     /*! The logical unit identifier associated with the notification (this
      *  field is only populated for SCSI async messages and ignored for all
      *  other types of asyncEvents). */
     UInt64 LUN;
-    
+
     /*! Session identifier. */
     SID sessionId;
-    
+
     /*! Connection identifier. */
     CID connectionId;
-    
+
 } iSCSIKernelNotificationAsyncMessage;
 
 
 /*! Function pointer indices.  These are the functions that can be called
- *	indirectly by calling IOCallScalarMethod(). */
+ *  indirectly by calling IOCallScalarMethod(). */
 enum functionNames {
-	kiSCSIOpenInitiator,
-	kiSCSICloseInitiator,
+    kiSCSIOpenInitiator,
+    kiSCSICloseInitiator,
     kiSCSICreateSession,
     kiSCSIReleaseSession,
     kiSCSISetSessionOption,
@@ -142,7 +142,7 @@ enum functionNames {
     kiSCSIGetPortalAddressForConnectionId,
     kiSCSIGetPortalPortForConnectionId,
     kiSCSIGetHostInterfaceForConnectionId,
-	kiSCSIInitiatorNumMethods
+    kiSCSIInitiatorNumMethods
 };
 
 #endif /* defined(__ISCSI_KERNEL_INTERFACE_SHARED_H__) */

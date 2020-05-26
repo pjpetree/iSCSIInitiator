@@ -191,7 +191,7 @@ iSCSIPortalRef iSCSISessionCopyPortalForConnectionId(iSCSISessionManagerRef mana
 CFDictionaryRef iSCSISessionCopyCFPropertiesForTarget(iSCSISessionManagerRef managerRef,
                                                       iSCSITargetRef target);
 
-/*! Creates a dictionary of connection parameters for the connection associated 
+/*! Creates a dictionary of connection parameters for the connection associated
  *  with the specified target and portal, if one exists.  The following keys
  *  are guaranteed to be in the dictionary:
  *

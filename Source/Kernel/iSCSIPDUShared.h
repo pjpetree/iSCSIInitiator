@@ -120,133 +120,133 @@ typedef struct __iSCSIPDUTargetBHS {
 
 /*! Possible reject codes that may be issued throughout the login process. */
 enum iSCSIPDURejectCode {
-    
+
     /*! Reserved reject code (not used). */
     kiSCSIPDURejectReserved = 0x01,
-    
+
     /*! Data digest error (may resend original PDU). */
     kiSCSIPDURejectDataDigestError = 0x02,
-    
+
     /*! Sequence ack was rejected (may resend original PDU). */
     kiSCSIPDURejectSNACKReject = 0x03,
-    
+
     /*! iSCSI protocol error has occured (e.g., SNACK was issued
      *  for something that was already acknowledged). */
     kiSCSIPDURejectProtoError = 0x04,
-    
+
     /*! The command is not supported. */
     kiSCSIPDURejectCmdNotSupported = 0x05,
-    
+
     /*! Too many commands. */
     kiSCSIPDURejectTooManyImmediateCmds = 0x06,
-    
+
     /*! There is a task in progress. */
     kiSCSIPDURejectTaskInProgress = 0x07,
-    
+
     /*! Invalid data acknowledgement. */
     kiSCSIPDURejectInvalidDataACK = 0x08,
-    
+
     /*! A PDU field was invalid. */
     kiSCSIPDURejectInvalidPDUField = 0x09,
-    
+
     /*! Can't generate target transfer tag; out of resources. */
     kiSCSIPDURejectLongOperationReject = 0x0a,
-    
+
     /*! Negotiation was reset. */
     kiSCSIPDURejectNegotiationReset = 0x0b,
-    
+
     /*! Waiting to logout. */
     kiSCSIPDURejectWaitingForLogout = 0x0c
 };
 
 /*! Asynchronous iSCSI events to be handled by the session layer. */
 enum iSCSIPDUAsyncMsgEvent {
-    
+
     /*! SCSI asynchronous event (with sense data). */
     kiSCSIPDUAsyncMsgSCSIAsyncMsg = 0x00,
-    
+
     /*! Target requests logout. */
     kiSCSIPDUAsyncMsgLogout = 0x01,
-    
+
     /*! Target will drop connection. */
     kiSCSIPDUAsynMsgDropConnection = 0x02,
-    
+
     /*! Target will drop all connections. */
     kiSCSIPDUAsyncMsgDropAllConnections = 0x03,
-    
+
     /*! Target requests parameter renegotiation. */
     kiSCSIPDUAsyncMsgNegotiateParams = 0x04,
-    
+
     /*! Vendor specific event. */
     kiSCSIPDUAsyncMsgVendorCode = 0xFF
 };
 
-/*!	Op codes are used to code PDUs sent form the initiator to the target.
+/*! Op codes are used to code PDUs sent form the initiator to the target.
  *  They specify the type of commands or data encoded witin the PDU. */
 enum iSCSIPDUInitiatorOpCodes {
-    
+
     /*! Initiator command for a ping. */
     kiSCSIPDUOpCodeNOPOut = 0x00,
-    
+
     /*! SCSI command send by the initiator. */
     kiSCSIPDUOpCodeSCSICmd = 0x01,
-    
+
     /*! Task management request sent by the initiator. */
     kiSCSIPDUOpCodeTaskMgmtReq= 0x02,
-    
+
     /*! Login request sent by the initiator. */
     kiSCSIPDUOpCodeLoginReq = 0x03,
-    
+
     /*! Text request sent by the initiator. */
     kiSCSIPDUOpCodeTextReq = 0x04,
-    
+
     /*! Data sent to a target. */
     kiSCSIPDUOpCodeDataOut = 0x05,
-    
+
     /*! Logout request sent by the initiator. */
     kiSCSIPDUOpCodeLogoutReq = 0x06,
-    
+
     /*! SNACK request sent by the initiator. */
     kiSCSIPDUOpCodeSNACKReq = 0x10,
-    
+
     /*! Maximum allowable initiator op code for error-checking. */
     kiSCSIPDUMaxInitiatorOpCode
 };
 
-/*!	Op codes are used to code PDUs sent form the initiator to the target.
+/*! Op codes are used to code PDUs sent form the initiator to the target.
  *  They specify the type of commands or data encoded witin the PDU. */
 enum iSCSIPDUTargetOpCodes {
-    
+
     /*! Target repsonse for a ping from the initiator. */
     kiSCSIPDUOpCodeNOPIn = 0x20,
-    
+
     /*! Target reponse for a SCSI command. */
     kiSCSIPDUOpCodeSCSIRsp = 0x21,
-    
+
     /*! Target response to a task management request. */
     kiSCSIPDUOpCodeTaskMgmtRsp = 0x22,
-    
+
     /*! Target response to a login request. */
     kiSCSIPDUOpCodeLoginRsp = 0x23,
-    
+
     /*! Target response to  a text request. */
     kiSCSIPDUOpCodeTextRsp = 0x24,
-    
+
     /*! Target response with data (e.g., to a SCSI read request). */
     kiSCSIPDUOpCodeDataIn = 0x25,
-    
+
     /*! Target response to a logout request. */
     kiSCSIPDUOpCodeLogoutRsp = 0x26,
-    
+
     /*! Target response indicating it is ready to transfer. */
     kiSCSIPDUOpCodeR2T = 0x31,
-    
+
     /*! Asynchronous message from the target. */
     kiSCSIPDUOpCodeAsyncMsg = 0x32,
-     
+
     /*! Response indicating last PDU was rejected. */
     kiSCSIPDUOpCodeReject = 0x3F,
-    
+
     /*! Maximum allowable target op code for error-checking. */
     kiSCSIPDUMaxTargetOpCode
 };

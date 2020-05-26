@@ -29,7 +29,7 @@
 #include "iSCSIPDUKernel.h"
 
 namespace iSCSIPDU {
-    
+
     const iSCSIPDUDataOutBHS iSCSIPDUDataOutBHSInit = {
         .opCode             = kiSCSIPDUOpCodeDataOut,
         .flags              = 0,
@@ -52,7 +52,7 @@ namespace iSCSIPDU {
         .LUN                = 0,
         .initiatorTaskTag   = 0,
         .dataTransferLength = 0 };
-    
+
     const iSCSIPDUTaskMgmtReqBHS iSCSIPDUTaskMgmtReqBHSInit = {
         .opCode             = kiSCSIPDUOpCodeTaskMgmtReq,
         .function           = 0,
@@ -63,7 +63,7 @@ namespace iSCSIPDU {
         .referencedTaskTag  = 0,
         .refCmdSN           = 0,
         .reserved2          = 0 };
-        
+
     const iSCSIPDUSNACKReqBHS iSCSIPDUSNACKReqBHSInit {
         .opCode = kiSCSIPDUOpCodeSNACKReq,
         .flags = 0,
@@ -80,20 +80,20 @@ namespace iSCSIPDU {
         .targetTransferTag  = 0,
         .reserved4          = 0,
         .reserved5          = 0 };
-    
+
     const iSCSIPDUExtCDBAHS iSCSIPDUExtCDBAHSInit = {
         .ahsLength = 0,
         .ahsType   = kiSCSIPDUAHSExtCDB,
         .reserved  = 0,
         .extendedCDB = NULL };
-    
+
     /*! Additional header segment for bi-directional read AHS. */
     const iSCSIPDUBiReadAHS iSCSIPDUBiReadAHSInit = {
         .ahsLength = 0,
         .ahsType = kiSCSIPDUAHSBiRead,
         .reserved = 0,
         .readDataLength = 0 };
-    
+
 };
 
 

@@ -199,7 +199,7 @@ typedef struct iSCSIDLogoutContext {
     DASessionRef diskSession;
     iSCSIPortalRef portal;
     errno_t errorCode;
-    
+
 } iSCSIDLogoutContext;
 
 
@@ -208,7 +208,7 @@ void iSCSIDUpdatePreferencesFromAppValues()
 {
     if(preferences != NULL)
         iSCSIPreferencesRelease(preferences);
-    
+
     preferences = iSCSIPreferencesCreateFromAppValues();
 }
 
@@ -365,9 +365,9 @@ errno_t iSCSIDLoginCommon(SessionIdentifier sessionId,
         CFIndex errorStringLength = CFStringGetMaximumSizeForEncoding(CFStringGetLength(errorString),kCFStringEncodingASCII) + sizeof('\0');
         char errorStringBuffer[errorStringLength];
         CFStringGetCString(errorString,errorStringBuffer,errorStringLength,kCFStringEncodingASCII);
-        
+
         asl_log(NULL, NULL, ASL_LEVEL_ERR, "%s", errorStringBuffer);
-        
+
         CFRelease(errorString);
     }
     // Update target alias in preferences (if one was furnished)
@@ -376,19 +376,19 @@ errno_t iSCSIDLoginCommon(SessionIdentifier sessionId,
         iSCSIPreferencesSetTargetAlias(preferences,targetIQN,iSCSITargetGetAlias(target));
         iSCSIPreferencesSynchronzeAppValues(preferences);
     }
-    
+
     if(sessCfg)
         iSCSISessionConfigRelease(sessCfg);
-    
+
     if(connCfg)
         iSCSIConnectionConfigRelease(connCfg);
-    
+
     if(targetAuth)
         iSCSIAuthRelease(targetAuth);
-    
+
     if(initiatorAuth)
         iSCSIAuthRelease(initiatorAuth);
-    
+
     return error;
 }
 
@@ -468,10 +468,10 @@ errno_t iSCSIDLoginAllPortals(iSCSIMutableTargetRef target,
             }
         }
     };
-    
+
     if(portals)
         CFRelease(portals);
-    
+
     return errorCode;
 }
 
@@ -550,24 +550,24 @@ errno_t iSCSIDLogin(int fd,iSCSIDMsgLoginCmd * cmd)
     }
 
     AuthorizationRef authorization = NULL;
-    
+
     // If authorization data is valid, create authorization object
     if(authorizationData) {
         AuthorizationExternalForm authorizationExtForm;
-        
+
         CFDataGetBytes(authorizationData,
                        CFRangeMake(0,kAuthorizationExternalFormLength),
                        (UInt8 *)&authorizationExtForm.bytes);
-        
+
         AuthorizationCreateFromExternalForm(&authorizationExtForm,&authorization);
         CFRelease(authorizationData);
     }
-    
+
     // If authorization object is valid, get the necessary rights
     if(authorization) {
         if(iSCSIAuthRightsAcquire(authorization,kiSCSIAuthLoginRight) != errAuthorizationSuccess)
             errorCode = EAUTH;
-        
+
         AuthorizationFree(authorization,kAuthorizationFlagDefaults);
     }
     else
@@ -588,7 +588,7 @@ errno_t iSCSIDLogin(int fd,iSCSIDMsgLoginCmd * cmd)
         else
             errorCode = EINVAL;
     }
-    
+
     // Compose a response to send back to the client
     iSCSIDMsgLoginRsp rsp = iSCSIDMsgLoginRspInit;
     rsp.errorCode = errorCode;
@@ -616,20 +616,20 @@ void iSCSIDLogoutComplete(iSCSITargetRef target,enum iSCSIDAOperationResult resu
     int fd = ctx->fd;
     errno_t errorCode = ctx->errorCode;
     iSCSIPortalRef portal = ctx->portal;
-    
+
     if(ctx->diskSession)
         CFRelease(ctx->diskSession);
     free(ctx);
 
     enum iSCSILogoutStatusCode statusCode = kiSCSILogoutInvalidStatusCode;
-    
+
     if(!errorCode)
     {
         SessionIdentifier sessionId = iSCSISessionGetSessionIdForTarget(sessionManager,iSCSITargetGetIQN(target));
 
         // For session logout, ensure that disk unmount was successful...
         if(!portal) {
-            
+
             if(result == kiSCSIDAOperationSuccess)
                 errorCode = iSCSISessionLogout(sessionManager,sessionId,&statusCode);
             else
@@ -640,11 +640,11 @@ void iSCSIDLogoutComplete(iSCSITargetRef target,enum iSCSIDAOperationResult resu
             errorCode = iSCSISessionRemoveConnection(sessionManager,sessionId,connectionId,&statusCode);
         }
     }
-    
+
     // Log error message
     if(errorCode) {
         CFStringRef errorString;
-        
+
         if(!portal) {
             errorString = CFStringCreateWithFormat(
                kCFAllocatorDefault,0,
@@ -661,25 +661,25 @@ void iSCSIDLogoutComplete(iSCSITargetRef target,enum iSCSIDAOperationResult resu
                 iSCSIPortalGetPort(portal),
                 strerror(errorCode));
         }
-        
+
         CFIndex errorStringLength = CFStringGetMaximumSizeForEncoding(CFStringGetLength(errorString),kCFStringEncodingASCII) + sizeof('\0');
         char errorStringBuffer[errorStringLength];
         CFStringGetCString(errorString,errorStringBuffer,errorStringLength,kCFStringEncodingASCII);
 
         asl_log(NULL, NULL, ASL_LEVEL_ERR, "%s", errorStringBuffer);
-        
+
         CFRelease(errorString);
     }
 
     if(portal)
         iSCSIPortalRelease(portal);
     iSCSITargetRelease(target);
-    
+
     // Compose a response to send back to the client
     iSCSIDMsgLogoutRsp rsp = iSCSIDMsgLogoutRspInit;
     rsp.errorCode = errorCode;
     rsp.statusCode = statusCode;
-    
+
     send(fd,&rsp,sizeof(rsp),0);
 }
 
@@ -702,26 +702,26 @@ errno_t iSCSIDLogout(int fd,iSCSIDMsgLogoutCmd * cmd)
         portal = iSCSIPortalCreateWithData(portalData);
         CFRelease(portalData);
     }
-    
+
     AuthorizationRef authorization = NULL;
-    
+
     // If authorization data is valid, create authorization object
     if(authorizationData) {
         AuthorizationExternalForm authorizationExtForm;
-        
+
         CFDataGetBytes(authorizationData,
                        CFRangeMake(0,kAuthorizationExternalFormLength),
                        (UInt8 *)&authorizationExtForm.bytes);
-        
+
         AuthorizationCreateFromExternalForm(&authorizationExtForm,&authorization);
         CFRelease(authorizationData);
     }
-    
+
     // If authorization object is valid, get the necessary rights
     if(authorization) {
         if(iSCSIAuthRightsAcquire(authorization,kiSCSIAuthLoginRight) != errAuthorizationSuccess)
             errorCode = EAUTH;
-        
+
         AuthorizationFree(authorization,kAuthorizationFlagDefaults);
     }
     else
@@ -736,37 +736,37 @@ errno_t iSCSIDLogout(int fd,iSCSIDMsgLogoutCmd * cmd)
             kCFAllocatorDefault,0,
             CFSTR("logout of %@ failed: the target has no active sessions"),
             iSCSITargetGetIQN(target));
-        
+
         CFIndex errorStringLength = CFStringGetMaximumSizeForEncoding(CFStringGetLength(errorString),kCFStringEncodingASCII) + sizeof('\0');
         char errorStringBuffer[errorStringLength];
         CFStringGetCString(errorString,errorStringBuffer,errorStringLength,kCFStringEncodingASCII);
-        
+
         asl_log(NULL, NULL, ASL_LEVEL_CRIT, "%s", errorStringBuffer);
-        
+
         CFRelease(errorString);
         errorCode = EINVAL;
     }
-    
+
     // See if there exists an active connection for this portal
     ConnectionIdentifier connectionId = kiSCSIInvalidConnectionId;
     CFIndex connectionCount = 0;
-    
+
     if(!errorCode && portal) {
         connectionId = iSCSISessionGetConnectionIdForPortal(sessionManager,sessionId,portal);
-        
+
         if(connectionId == kiSCSIInvalidConnectionId) {
-        
+
             CFStringRef errorString = CFStringCreateWithFormat(
                 kCFAllocatorDefault,0,
                 CFSTR("logout of %@,%@:%@ failed: the portal has no active connections"),
                 iSCSITargetGetIQN(target),iSCSIPortalGetAddress(portal),iSCSIPortalGetPort(portal));
-        
+
             CFIndex errorStringLength = CFStringGetMaximumSizeForEncoding(CFStringGetLength(errorString),kCFStringEncodingASCII) + sizeof('\0');
             char errorStringBuffer[errorStringLength];
             CFStringGetCString(errorString,errorStringBuffer,errorStringLength,kCFStringEncodingASCII);
 
             asl_log(NULL, NULL, ASL_LEVEL_CRIT, "%s", errorStringBuffer);
-            
+
             CFRelease(errorString);
             errorCode = EINVAL;
         }
@@ -777,7 +777,7 @@ errno_t iSCSIDLogout(int fd,iSCSIDMsgLogoutCmd * cmd)
             CFRelease(connectionIds);
         }
     }
-    
+
     // Unmount volumes if portal not specified (session logout)
     // or if portal is specified and is only connection...
     iSCSIDLogoutContext * context;
@@ -786,7 +786,7 @@ errno_t iSCSIDLogout(int fd,iSCSIDMsgLogoutCmd * cmd)
     context->portal = NULL;
     context->errorCode = errorCode;
     context->diskSession = NULL;
-    
+
     // Unmount and session logout
     if(!errorCode && (!portal || connectionCount == 1))
     {
@@ -880,7 +880,7 @@ errno_t iSCSIDCreateArrayofActivePortalsForTarget(int fd,
 
     if(data)
         CFRelease(data);
-    
+
     if(sessionIds)
         CFRelease(sessionIds);
 
@@ -902,7 +902,7 @@ errno_t iSCSIDIsTargetActive(int fd,iSCSIDMsgIsTargetActiveCmd *cmd)
     if(target) {
         iSCSIDMsgIsTargetActiveRsp rsp = iSCSIDMsgIsTargetActiveRspInit;
         rsp.active = (iSCSISessionGetSessionIdForTarget(sessionManager,iSCSITargetGetIQN(target)) != kiSCSIInvalidSessionId);
-        
+
         iSCSITargetRelease(target);
 
         if(send(fd,&rsp,sizeof(rsp),0) != sizeof(rsp))
@@ -937,10 +937,10 @@ errno_t iSCSIDIsPortalActive(int fd,iSCSIDMsgIsPortalActiveCmd *cmd)
         rsp.active = false;
     else
         rsp.active = (iSCSISessionGetConnectionIdForPortal(sessionManager,sessionId,portal) != kiSCSIInvalidConnectionId);
-    
+
     if(target)
         iSCSITargetRelease(target);
-    
+
     if(portal)
         iSCSIPortalRelease(portal);
 
@@ -1029,10 +1029,10 @@ errno_t iSCSIDCreateCFPropertiesForSession(int fd,
         if(data)
             CFRelease(data);
     }
-    
+
     if(target)
         iSCSITargetRelease(target);
-    
+
     return error;
 }
 
@@ -1079,16 +1079,16 @@ errno_t iSCSIDCreateCFPropertiesForConnection(int fd,
         }
         else
             rsp.dataLength = 0;
-        
+
         error = iSCSIDaemonSendMsg(fd,(iSCSIDMsgGeneric*)&rsp,data,NULL);
-        
+
         if(data)
             CFRelease(data);
     }
-    
+
     if(target)
         iSCSITargetRelease(target);
-    
+
     if(portal)
         iSCSIPortalRelease(portal);
 
@@ -1103,22 +1103,22 @@ errno_t iSCSIDAddTargetForSendTargets(iSCSIPreferencesRef preferences,
 {
     CFArrayRef portalGroups = iSCSIDiscoveryRecCreateArrayOfPortalGroupTags(discoveryRec,targetIQN);
     CFIndex portalGroupCount = CFArrayGetCount(portalGroups);
-    
+
     // Iterate over portal groups for this target
     for(CFIndex portalGroupIdx = 0; portalGroupIdx < portalGroupCount; portalGroupIdx++)
     {
         CFStringRef portalGroupTag = CFArrayGetValueAtIndex(portalGroups,portalGroupIdx);
         CFArrayRef portals = iSCSIDiscoveryRecGetPortals(discoveryRec,targetIQN,portalGroupTag);
         CFIndex portalsCount = CFArrayGetCount(portals);
-        
+
         iSCSIPortalRef portal = NULL;
-        
+
         // Iterate over portals within this group
         for(CFIndex portalIdx = 0; portalIdx < portalsCount; portalIdx++)
         {
             if(!(portal = CFArrayGetValueAtIndex(portals,portalIdx)))
                 continue;
-            
+
             // Add portal to target, or add target as necessary
             if(iSCSIPreferencesContainsTarget(preferences,targetIQN))
                 iSCSIPreferencesSetPortalForTarget(preferences,targetIQN,portal);
@@ -1126,9 +1126,9 @@ errno_t iSCSIDAddTargetForSendTargets(iSCSIPreferencesRef preferences,
                 iSCSIPreferencesAddDynamicTargetForSendTargets(preferences,targetIQN,portal,discoveryPortal);
         }
     }
-    
+
     CFRelease(portalGroups);
-    
+
     return 0;
 }
 
@@ -1139,10 +1139,10 @@ void * iSCSIDRunDiscovery(void * context)
 
     discoveryRecords = iSCSIDiscoveryCreateRecordsWithSendTargets(sessionManager,preferences);
 
-    
+
     // Clear mutex created when discovery was launched
     pthread_mutex_unlock(&discoveryMutex);
-    
+
     CFRunLoopSourceSignal(discoverySource);
     return NULL;
 }
@@ -1151,21 +1151,21 @@ void iSCSIDProcessDiscoveryData(void * info)
 {
     // Process discovery results if any
     if(discoveryRecords) {
-        
+
         pthread_mutex_lock(&preferencesMutex);
         iSCSIDUpdatePreferencesFromAppValues();
-        
+
         const CFIndex count = CFDictionaryGetCount(discoveryRecords);
         const void * keys[count];
         const void * values[count];
         CFDictionaryGetKeysAndValues(discoveryRecords,keys,values);
-        
+
         for(CFIndex i = 0; i < count; i++)
             iSCSIDiscoveryUpdatePreferencesWithDiscoveredTargets(sessionManager,preferences,keys[i],values[i]);
-        
+
         iSCSIPreferencesSynchronzeAppValues(preferences);
         pthread_mutex_unlock(&preferencesMutex);
-        
+
         CFRelease(discoveryRecords);
     }
 }
@@ -1178,14 +1178,14 @@ void iSCSIDLaunchDiscoveryThread(CFRunLoopTimerRef timer,void * context)
     pthread_attr_t  attribute;
     pthread_t thread;
     errno_t error = 0;
-    
+
     if(pthread_mutex_trylock(&discoveryMutex))
     {
         error = pthread_attr_init(&attribute);
         assert(!error);
         error = pthread_attr_setdetachstate(&attribute,PTHREAD_CREATE_DETACHED);
         assert(!error);
-        
+
         error = pthread_create(&thread,&attribute,&iSCSIDRunDiscovery,NULL);
         pthread_attr_destroy(&attribute);
     }
@@ -1205,7 +1205,7 @@ void iSCSIDLaunchDiscoveryThread(CFRunLoopTimerRef timer,void * context)
  *  includes for example, the initiator name and alias and discovery settings
  *  (whether discovery is enabled or disabled, and the time interval
  *  associated with discovery).
- *  @param fd unused, pass in 0 (retained for interface consistency). 
+ *  @param fd unused, pass in 0 (retained for interface consistency).
  *  @param cmd unused, pass in 0 (retained for interface consistency). */
 errno_t iSCSIDUpdateDiscovery(int fd,
                               iSCSIDMsgUpdateDiscoveryCmd * cmd)
@@ -1253,41 +1253,41 @@ errno_t iSCSIDPreferencesIOLockAndSync(int fd,iSCSIDMsgPreferencesIOLockAndSyncC
     errno_t error = iSCSIDaemonRecvMsg(fd,0,&authorizationData,cmd->authorizationLength,NULL);
 
     AuthorizationRef authorization = NULL;
-    
+
     // If authorization data is valid, create authorization object
     if(authorizationData) {
         AuthorizationExternalForm authorizationExtForm;
-        
+
         CFDataGetBytes(authorizationData,
                        CFRangeMake(0,kAuthorizationExternalFormLength),
                        (UInt8 *)&authorizationExtForm.bytes);
-        
+
         AuthorizationCreateFromExternalForm(&authorizationExtForm,&authorization);
         CFRelease(authorizationData);
     }
-    
+
     // If authorization object is valid, get the necessary rights
     if(authorization) {
         if(iSCSIAuthRightsAcquire(authorization,kiSCSIAuthModifyRight) != errAuthorizationSuccess)
             error = EAUTH;
-        
+
         AuthorizationFree(authorization,kAuthorizationFlagDefaults);
     }
     else
         error = EINVAL;
-    
+
     // If we have the necessary rights, lock
     if(!error) {
         pthread_mutex_lock(&preferencesMutex);
     }
-    
+
     // Compose a response to send back to the client
     iSCSIDMsgPreferencesIOLockAndSyncRsp rsp = iSCSIDMsgPreferencesIOLockAndSyncRspInit;
     rsp.errorCode = error;
-    
+
     if(send(fd,&rsp,sizeof(rsp),0) != sizeof(rsp))
         return EAGAIN;
-    
+
     return 0;
 }
 
@@ -1296,33 +1296,33 @@ errno_t iSCSIDPreferencesIOUnlockAndSync(int fd,iSCSIDMsgPreferencesIOUnlockAndS
     // Verify that the client is authorized for the operation
     CFDataRef preferencesData = NULL;
     errno_t error = iSCSIDaemonRecvMsg(fd,0,&preferencesData,cmd->preferencesLength,NULL);
-    
+
     iSCSIPreferencesRef preferencesToSync = NULL;
-    
+
     if(preferencesData) {
         preferencesToSync = iSCSIPreferencesCreateWithData(preferencesData);
         CFRelease(preferencesData);
     }
-    
+
     // If no errors and the daemon was previously locked out for sync
     if(!error && preferencesToSync && pthread_mutex_trylock(&preferencesMutex))
     {
         iSCSIPreferencesSynchronzeAppValues(preferencesToSync);
         iSCSIPreferencesUpdateWithAppValues(preferences);
     }
-    
+
     pthread_mutex_unlock(&preferencesMutex);
-    
+
     if(preferencesToSync)
         iSCSIPreferencesRelease(preferencesToSync);
-    
+
     // Compose a response to send back to the client
     iSCSIDMsgPreferencesIOUnlockAndSyncRsp rsp = iSCSIDMsgPreferencesIOUnlockAndSyncRspInit;
     rsp.errorCode = error;
-    
+
     if(send(fd,&rsp,sizeof(rsp),0) != sizeof(rsp))
         return EAGAIN;
-    
+
     return 0;
 }
 
@@ -1333,32 +1333,32 @@ errno_t iSCSIDSetSharedSecret(int fd,iSCSIDMsgSetSharedSecretCmd *cmd)
     errno_t error = iSCSIDaemonRecvMsg(fd,0,&authorizationData,cmd->authorizationLength,
                                        &nodeIQNData,cmd->nodeIQNLength,
                                        &sharedSecretData,cmd->secretLength,NULL);
-    
+
     AuthorizationRef authorization = NULL;
     CFStringRef nodeIQN = NULL;
     CFStringRef sharedSecret = NULL;
-    
+
     if(authorizationData) {
         AuthorizationExternalForm authorizationExtForm;
-        
+
         CFDataGetBytes(authorizationData,
                        CFRangeMake(0,kAuthorizationExternalFormLength),
                        (UInt8 *)&authorizationExtForm.bytes);
-        
+
         AuthorizationCreateFromExternalForm(&authorizationExtForm,&authorization);
         CFRelease(authorizationData);
     }
-    
+
     if(nodeIQNData) {
         nodeIQN = CFStringCreateFromExternalRepresentation(kCFAllocatorDefault,nodeIQNData,kCFStringEncodingASCII);
         CFRelease(nodeIQNData);
     }
-    
+
     if(sharedSecretData) {
         sharedSecret = CFStringCreateFromExternalRepresentation(kCFAllocatorDefault,sharedSecretData,kCFStringEncodingASCII);
         CFRelease(sharedSecretData);
     }
-    
+
     // If no errors then update secret
     if(!error && nodeIQN) {
         // If authorization object is valid, get the necessary rights
@@ -1378,13 +1378,13 @@ errno_t iSCSIDSetSharedSecret(int fd,iSCSIDMsgSetSharedSecretCmd *cmd)
     // Compose a response to send back to the client
     iSCSIDMsgSetSharedSecretRsp rsp = iSCSIDMsgSetSharedSecretRspInit;
     rsp.errorCode = error;
-    
+
     if(send(fd,&rsp,sizeof(rsp),0) != sizeof(rsp))
         return EAGAIN;
 
     if(nodeIQN)
         CFRelease(nodeIQN);
-    
+
     if(sharedSecret)
         CFRelease(sharedSecret);
 
@@ -1397,26 +1397,26 @@ errno_t iSCSIDRemoveSharedSecret(int fd,iSCSIDMsgRemoveSharedSecretCmd *cmd)
     CFDataRef authorizationData = NULL, nodeIQNData = NULL;
     errno_t error = iSCSIDaemonRecvMsg(fd,0,&authorizationData,cmd->authorizationLength,
                                        &nodeIQNData,cmd->nodeIQNLength,NULL);
-    
+
     AuthorizationRef authorization = NULL;
     CFStringRef nodeIQN = NULL;
-    
+
     if(authorizationData) {
         AuthorizationExternalForm authorizationExtForm;
-        
+
         CFDataGetBytes(authorizationData,
                        CFRangeMake(0,kAuthorizationExternalFormLength),
                        (UInt8 *)&authorizationExtForm.bytes);
-        
+
         AuthorizationCreateFromExternalForm(&authorizationExtForm,&authorization);
         CFRelease(authorizationData);
     }
-    
+
     if(nodeIQNData) {
         nodeIQN = CFStringCreateFromExternalRepresentation(kCFAllocatorDefault,nodeIQNData,kCFStringEncodingASCII);
         CFRelease(nodeIQNData);
     }
-    
+
     // If no errors then remove secret
     if(!error && nodeIQN) {
         // If authorization object is valid, get the necessary rights
@@ -1431,17 +1431,17 @@ errno_t iSCSIDRemoveSharedSecret(int fd,iSCSIDMsgRemoveSharedSecretCmd *cmd)
         else
             error = EINVAL;
     }
-    
+
     // Compose a response to send back to the client
     iSCSIDMsgRemoveSharedSecretRsp rsp = iSCSIDMsgRemoveSharedSecretRspInit;
     rsp.errorCode = error;
-    
+
     if(send(fd,&rsp,sizeof(rsp),0) != sizeof(rsp))
         return EAGAIN;
-    
+
     if(nodeIQN)
         CFRelease(nodeIQN);
-    
+
     return 0;
 }
 
@@ -1452,17 +1452,17 @@ void iSCSIDProcessQueuedLogin(SCNetworkReachabilityRef reachabilityTarget,
                               void * info)
 {
     struct iSCSIDQueueLoginForTargetPortal * loginRef = info;
-    
+
     iSCSIMutableTargetRef target = iSCSITargetCreateMutableCopy(loginRef->target);
     iSCSIPortalRef portal = loginRef->portal;
-    
+
     enum iSCSILoginStatusCode statusCode;
     iSCSIDLoginWithPortal(target,portal,&statusCode);
-    
+
     iSCSITargetRelease(target);
     iSCSITargetRelease(loginRef->target);
     iSCSIPortalRelease(portal);
-    
+
     free(loginRef);
 }
 
@@ -1473,27 +1473,27 @@ void iSCSIDQueueLogin(iSCSITargetRef target,iSCSIPortalRef portal)
 {
     if(!target || !portal)
         return;
-    
+
     iSCSITargetRetain(target);
     iSCSIPortalRetain(portal);
-        
+
     SCNetworkReachabilityRef reachabilityTarget;
     SCNetworkReachabilityContext reachabilityContext;
-    
+
     struct iSCSIDQueueLoginForTargetPortal * loginRef = malloc(sizeof(struct iSCSIDQueueLoginForTargetPortal));
     loginRef->target = target;
     loginRef->portal = portal;
-    
+
     reachabilityContext.info = loginRef;
     reachabilityContext.copyDescription = 0;
     reachabilityContext.retain = 0;
     reachabilityContext.release = 0;
-    
+
     char portalAddressBuffer[NI_MAXHOST];
-    
+
     if(!CFStringGetCString(iSCSIPortalGetAddress(portal),portalAddressBuffer,NI_MAXHOST,kCFStringEncodingASCII))
         return;
-    
+
     // If a specific host interface was specified, create with pair...
     if(CFStringCompare(iSCSIPortalGetHostInterface(portal),kiSCSIDefaultHostInterface,0) == kCFCompareEqualTo)
         reachabilityTarget = SCNetworkReachabilityCreateWithName(kCFAllocatorDefault,portalAddressBuffer);
@@ -1501,27 +1501,27 @@ void iSCSIDQueueLogin(iSCSITargetRef target,iSCSIPortalRef portal)
 
         struct sockaddr_storage remoteAddress, localAddress;
         iSCSIUtilsGetAddressForPortal(portal,&remoteAddress,&localAddress);
-        
+
         reachabilityTarget = SCNetworkReachabilityCreateWithAddressPair(kCFAllocatorDefault,
                                                                         (const struct sockaddr *)&localAddress,
                                                                         (const struct sockaddr *)&remoteAddress);
     }
-    
+
     // If the target is reachable just login; otherwise queue the login ...
     SCNetworkReachabilityFlags reachabilityFlags;
     SCNetworkReachabilityGetFlags(reachabilityTarget,&reachabilityFlags);
-    
+
     if(reachabilityFlags & kSCNetworkReachabilityFlagsReachable) {
         enum iSCSILoginStatusCode statusCode;
         iSCSIMutableTargetRef mutableTarget = iSCSITargetCreateMutableCopy(target);
         iSCSITargetRelease(target);
         iSCSIDLoginWithPortal(mutableTarget,portal,&statusCode);
-        
+
         iSCSITargetRelease(mutableTarget);
         iSCSIPortalRelease(portal);
         CFRelease(reachabilityTarget);
         free(loginRef);
-    
+
     }
     else {
         SCNetworkReachabilitySetCallback(reachabilityTarget,iSCSIDProcessQueuedLogin,&reachabilityContext);
@@ -1533,12 +1533,12 @@ void iSCSIDSessionTimeoutHandler(iSCSITargetRef target,iSCSIPortalRef portal)
 {
     if(!target || !portal)
         return;
-    
+
     // Post message to system log
     asl_log(NULL,NULL,ASL_LEVEL_ERR,"TCP timeout for %s over portal %s.",
             CFStringGetCStringPtr(iSCSITargetGetIQN(target),kCFStringEncodingASCII),
             CFStringGetCStringPtr(iSCSIPortalGetAddress(portal),kCFStringEncodingASCII));
-    
+
     // If this was a persistance target, queue another login when the network is
     // available
     if(iSCSIPreferencesGetPersistenceForTarget(preferences,iSCSITargetGetIQN(target)))
@@ -1546,53 +1546,53 @@ void iSCSIDSessionTimeoutHandler(iSCSITargetRef target,iSCSIPortalRef portal)
 }
 
 /*! Automatically logs in to targets that were specified for auto-login.
- *  Used during startup of the daemon to log in to either static 
+ *  Used during startup of the daemon to log in to either static
  *  dynamic targets for which the auto-login option is enabled. */
 void iSCSIDAutoLogin()
 {
     // Iterate over all targets and auto-login as required
     iSCSIDUpdatePreferencesFromAppValues();
-    
+
     CFArrayRef targets = NULL;
 
     if(!(targets = iSCSIPreferencesCreateArrayOfTargets(preferences)))
        return;
-    
+
     CFIndex targetsCount = CFArrayGetCount(targets);
-    
+
     for(CFIndex idx = 0; idx < targetsCount; idx++)
     {
         CFStringRef targetIQN = CFArrayGetValueAtIndex(targets,idx);
         iSCSITargetRef target = NULL;
-        
+
         if(!(target = iSCSIPreferencesCopyTarget(preferences,targetIQN)))
             continue;
-        
+
         // See if this target requires auto-login and process it
         if(iSCSIPreferencesGetAutoLoginForTarget(preferences,targetIQN)) {
-            
+
             CFArrayRef portals = NULL;
-            
+
             if(!(portals = iSCSIPreferencesCreateArrayOfPortalsForTarget(preferences,targetIQN)))
                 continue;
-            
+
             CFIndex portalsCount = CFArrayGetCount(portals);
-            
+
             // Queue a login operation for a each portal; mind the interface is one is required
             for(CFIndex portalIdx = 0; portalIdx < portalsCount; portalIdx++)
             {
                 CFStringRef portalAddress = CFArrayGetValueAtIndex(portals,portalIdx);
                 iSCSIPortalRef portal = iSCSIPreferencesCopyPortalForTarget(preferences,targetIQN,portalAddress);
-                
+
                 if(portal) {
                     iSCSIDQueueLogin(target,portal);
                     iSCSIPortalRelease(portal);
                 }
             }
-    
+
             CFRelease(portals);
         }
-        
+
         iSCSITargetRelease(target);
     }
     CFRelease(targets);
@@ -1603,33 +1603,33 @@ void iSCSIDRestoreFromSystemSleep()
     // Do nothing if targets were not active before sleeping
     if(!activeTargets)
         return;
-    
+
     const CFIndex count = CFDictionaryGetCount(activeTargets);
-    
+
     const CFStringRef targets[count];
     const CFArrayRef portalArrays[count];
-    
+
     CFDictionaryGetKeysAndValues(activeTargets,(const void**)targets,(const void**)portalArrays);
-    
+
     for(CFIndex idx = 0; idx < count; idx++)
     {
         CFStringRef targetIQN = targets[idx];
         CFArrayRef portalArray = portalArrays[idx];
         CFIndex portalCount = CFArrayGetCount(portalArray);
-        
+
         for(CFIndex portalIdx = 0; portalIdx < portalCount; portalIdx++)
         {
             enum iSCSILoginStatusCode statusCode;
             iSCSIPortalRef portal = CFArrayGetValueAtIndex(portalArray,portalIdx);
-            
+
             iSCSIMutableTargetRef target = iSCSITargetCreateMutable();
             iSCSITargetSetIQN(target,targetIQN);
-            
+
             iSCSIDLoginWithPortal(target,portal,&statusCode);
             iSCSITargetRelease(target);
         }
     }
-    
+
     CFRelease(activeTargets);
     activeTargets = NULL;
 }
@@ -1649,38 +1649,38 @@ void iSCSIDPrepareForSystemSleepComplete(iSCSITargetRef target,
 void iSCSIDPrepareForSystemSleep()
 {
     CFArrayRef sessionIds = iSCSISessionCopyArrayOfSessionIds(sessionManager);
-    
+
     if(!sessionIds)
         return;
-    
+
     CFIndex sessionCount = CFArrayGetCount(sessionIds);
-    
+
     // Create disk arbitration session to force unmount of all volumes
     DASessionRef diskSession = DASessionCreate(kCFAllocatorDefault);
-    
+
     // Clear stale list if one is present
     if(activeTargets) {
         CFRelease(activeTargets);
     }
-    
+
     activeTargets = CFDictionaryCreateMutable(kCFAllocatorDefault,0,
                                               &kCFTypeDictionaryKeyCallBacks,
                                               &kCFTypeDictionaryValueCallBacks);
-    
+
     for(CFIndex idx = 0; idx < sessionCount; idx++)
     {
         SessionIdentifier sessionId = (SessionIdentifier)CFArrayGetValueAtIndex(sessionIds,idx);
         iSCSITargetRef target = iSCSISessionCopyTargetForId(sessionManager,sessionId);
-        
+
         if(!target)
             continue;
-    
+
         CFStringRef targetIQN = iSCSITargetGetIQN(target);
         CFArrayRef connectionIds = iSCSISessionCopyArrayOfConnectionIds(sessionManager,sessionId);
         CFIndex connectionCount = CFArrayGetCount(connectionIds);
-        
+
         CFMutableArrayRef portals = CFArrayCreateMutable(kCFAllocatorDefault,0,&kCFTypeArrayCallBacks);
-        
+
         for(CFIndex connIdx = 0; connIdx < connectionCount; connIdx++)
         {
             ConnectionIdentifier connectionId = (ConnectionIdentifier)CFArrayGetValueAtIndex(connectionIds,connIdx);
@@ -1688,14 +1688,14 @@ void iSCSIDPrepareForSystemSleep()
             CFArrayAppendValue(portals,portal);
             CFRelease(portal);
         }
-        
+
         // Add array of active portals for target...
         CFDictionarySetValue(activeTargets,targetIQN,portals);
 
         DASessionScheduleWithRunLoop(diskSession,CFRunLoopGetMain(),kCFRunLoopDefaultMode);
         iSCSIDAUnmountForTarget(diskSession,kDADiskUnmountOptionWhole,target,&iSCSIDPrepareForSystemSleepComplete,(void*)sessionId);
     }
-    
+
     CFRetain(diskSession);
 }
 
@@ -1757,12 +1757,12 @@ void iSCSIDProcessIncomingRequest(void * info)
 {
     struct iSCSIDIncomingRequestInfo * reqInfo = (struct iSCSIDIncomingRequestInfo*)info;
     iSCSIDMsgCmd cmd;
-    
+
     int fd = reqInfo->fd;
-    
+
     if(fd != 0 && recv(fd,&cmd,sizeof(cmd),MSG_WAITALL) == sizeof(cmd)) {
         errno_t error = 0;
-        
+
         switch(cmd.funcCode)
         {
             case kiSCSIDLogin:
@@ -1798,11 +1798,11 @@ void iSCSIDProcessIncomingRequest(void * info)
                 reqInfo->fd = 0;
                 pthread_mutex_unlock(&preferencesMutex);
         };
-        
+
         if(error)
             asl_log(NULL,NULL,ASL_LEVEL_ERR,"error code %d while processing user request",error);
     }
-    
+
     // If a request came in while we were processing, queue it up...
     if(reqInfo->fd && recv(fd,&cmd,sizeof(cmd),MSG_PEEK) > 0) {
             CFRunLoopSourceSignal(reqInfo->socketSourceRead);
@@ -1813,7 +1813,7 @@ void iSCSIDProcessIncomingRequest(void * info)
  *  established, main runloop calls this function. This function processes
  *  all incoming commands until a shutdown request is received, at which point
  *  this function terminates and returns control to the run loop. For this
- *  reason, no other commands (e.g., timers) can be executed until the 
+ *  reason, no other commands (e.g., timers) can be executed until the
  *  incoming request is processed. */
 void iSCSIDAcceptConnection(CFSocketRef socket,
                             CFSocketCallBackType callbackType,
@@ -1828,18 +1828,18 @@ void iSCSIDAcceptConnection(CFSocketRef socket,
         if(reqInfo->fd != 0) {
             close(reqInfo->fd);
         }
-        
+
         reqInfo->fd = *(CFSocketNativeHandle*)data;
-        
+
         // Set timeouts for send() and recv()
         struct timeval tv;
         memset(&tv,0,sizeof(tv));
         tv.tv_usec = kiSCSIDaemonTimeoutMilliSec*1000;
-        
+
         setsockopt(reqInfo->fd,SOL_SOCKET,SO_SNDTIMEO,&tv,sizeof(tv));
         setsockopt(reqInfo->fd,SOL_SOCKET,SO_RCVTIMEO,&tv,sizeof(tv));
     }
-    
+
     iSCSIDProcessIncomingRequest(info);
 }
 
@@ -1859,12 +1859,12 @@ int main(void)
 {
     // Initialize logging
     aslclient log = asl_open(NULL,NULL,ASL_OPT_STDERR);
-    
+
     // Start the iSCSI session manager (which creates a connection to the HBA)
     iSCSISessionManagerCallBacks callbacks;
     callbacks.timeoutCallback = iSCSIDSessionTimeoutHandler;
     sessionManager = iSCSISessionManagerCreate(kCFAllocatorDefault,callbacks);
-    
+
     // Let launchd call us again once the HBA kext is loaded
     if(!sessionManager) {
         asl_log(NULL,NULL,ASL_LEVEL_ALERT,"kernel extension has not been loaded, iSCSI services unavailable");
@@ -1874,10 +1874,10 @@ int main(void)
 
     // Read configuration parameters from the iSCSI property list
     iSCSIDUpdatePreferencesFromAppValues();
-    
+
     // Update initiator name and alias internally
     CFStringRef initiatorIQN = iSCSIPreferencesCopyInitiatorIQN(preferences);
-    
+
     if(initiatorIQN) {
         iSCSISessionManagerSetInitiatorName(sessionManager,initiatorIQN);
         CFRelease(initiatorIQN);
@@ -1934,11 +1934,11 @@ int main(void)
         asl_log(NULL,NULL,ASL_LEVEL_ALERT,"could not register to receive system power events");
         goto ERROR_PWR_MGMT_FAIL;
     }
-    
+
     // Context for processing incoming requests. Holds references to CFSocket and
     // associated structures (e.g., runloop sources)
     reqInfo = malloc(sizeof(struct iSCSIDIncomingRequestInfo));
-    
+
     // Create a socket with a callback to accept incoming connections
     CFSocketContext sockContext;
     bzero(&sockContext,sizeof(sockContext));
@@ -1948,11 +1948,11 @@ int main(void)
                                                   launch_data_get_fd(listen_socket),
                                                   kCFSocketAcceptCallBack,
                                                   iSCSIDAcceptConnection,&sockContext);
-    
+
     // Runloop source for CFSocket callback (iSCSIDAcceptConnection)
     CFRunLoopSourceRef sockSourceAccept = CFSocketCreateRunLoopSource(kCFAllocatorDefault,socket,0);
     CFRunLoopAddSource(CFRunLoopGetMain(),sockSourceAccept,kCFRunLoopDefaultMode);
-    
+
     // Runloop source signaled by daemon to queue processing of incoming data
     CFRunLoopSourceRef sockSourceRead;
     CFRunLoopSourceContext readContext;
@@ -1961,12 +1961,12 @@ int main(void)
     readContext.perform = iSCSIDProcessIncomingRequest;
     sockSourceRead = CFRunLoopSourceCreate(kCFAllocatorDefault,1,&readContext);
     CFRunLoopAddSource(CFRunLoopGetMain(),sockSourceRead,kCFRunLoopDefaultMode);
-    
+
     // Setup context
     reqInfo->socket = socket;
     reqInfo->socketSourceRead = sockSourceRead;
     reqInfo->fd = 0;
-    
+
     // Runloop source signal by deamoen when discovery data is ready to be processed
     CFRunLoopSourceContext discoveryContext;
     bzero(&discoveryContext,sizeof(discoveryContext));
@@ -1979,40 +1979,40 @@ int main(void)
 
     // Ignore SIGPIPE (generated when the client closes the connection)
     signal(SIGPIPE,sig_pipe_handler);
-    
+
     // Setup authorization rights if none exist
     AuthorizationRef authorization;
     AuthorizationCreate(NULL,NULL,0,&authorization);
     iSCSIAuthRightsInitialize(authorization);
     AuthorizationFree(authorization,kAuthorizationFlagDefaults);
-    
+
     // Sync discovery parameters upon startup
     iSCSIDUpdateDiscovery(0,NULL);
-    
+
     // Auto-login upon startup
     iSCSIDAutoLogin();
-    
+
     CFRunLoopRun();
-    
+
     iSCSISessionManagerUnscheduleWithRunloop(sessionManager,CFRunLoopGetMain(),kCFRunLoopDefaultMode);
     iSCSISessionManagerRelease(sessionManager);
     sessionManager = NULL;
-    
+
     // Deregister for power
     iSCSIDDeregisterForPowerEvents();
-    
+
     // Free all CF objects and reqInfo structure...
     free(reqInfo);
     launch_data_free(reg_response);
     asl_close(log);
     return 0;
-    
+
     // TODO: verify that launch data is freed under all possible execution paths
-    
+
 ERROR_PWR_MGMT_FAIL:
 ERROR_NO_SOCKETS:
     launch_data_free(reg_response);
-    
+
 ERROR_LAUNCH_DATA:
     asl_close(log);
     return ENOTSUP;

@@ -45,18 +45,18 @@ CFStringRef kRightPromptModify = CFSTR("For modifying initiator, discovery and t
 OSStatus iSCSIAuthRightsInitialize(AuthorizationRef authorization)
 {
     OSStatus error = noErr;
-    
+
     // Login and logout right does not exist, create it
     if(AuthorizationRightGet(kiSCSIAuthRightLogin,NULL) != noErr)
         AuthorizationRightSet(authorization,kiSCSIAuthRightLogin,
                               CFSTR(kAuthorizationRuleClassAllow),kRightPromptLogin,
                               NULL,NULL);
-    
+
     if(AuthorizationRightGet(kiSCSIAuthRightModify,NULL) != noErr)
         AuthorizationRightSet(authorization,kiSCSIAuthRightModify,
                               CFSTR(kAuthorizationRuleClassAllow),kRightPromptModify,
                               NULL,NULL);
-    
+
     return error;
 }
 
@@ -68,7 +68,7 @@ OSStatus iSCSIAuthRightsInitialize(AuthorizationRef authorization)
 OSStatus iSCSIAuthRightsAcquire(AuthorizationRef authorization,enum iSCSIAuthRights authRight)
 {
     const char * rightName;
-    
+
     switch(authRight)
     {
         case kiSCSIAuthLoginRight:
@@ -80,11 +80,11 @@ OSStatus iSCSIAuthRightsAcquire(AuthorizationRef authorization,enum iSCSIAuthRig
         default:
             return errAuthorizationCanceled;
     }
-    
+
     AuthorizationItem actionRight = { rightName, 0, 0, 0 };
     AuthorizationRights rights = { 1, &actionRight };
-    
+
     OSStatus error = AuthorizationCopyRights(authorization,&rights,NULL,kAuthorizationFlagExtendRights|kAuthorizationFlagInteractionAllowed,NULL);
-    
+
     return error;
 }

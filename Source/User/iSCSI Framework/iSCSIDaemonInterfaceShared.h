@@ -83,7 +83,7 @@ typedef struct __iSCSIDMsgCmd {
     UInt32 reserved4;
     UInt32 reserved5;
     UInt32 reserved6;
-    
+
 } __attribute__((packed)) iSCSIDMsgCmd;
 
 /*! Generic iSCSI daemon response header. */
@@ -96,7 +96,7 @@ typedef struct __iSCSIDMsgRsp {
     UInt32 reserved4;
     UInt32 reserved5;
     UInt32 reserved6;
-    
+
 } __attribute__((packed)) iSCSIDMsgRsp;
 
 /*! Command to shutdown the daemon. */
@@ -109,7 +109,7 @@ typedef struct __iSCSIDMsgShutdownCmd {
     UInt32 reserved4;
     UInt32 reserved5;
     UInt32 reserved6;
-    
+
 } __attribute__((packed)) iSCSIDMsgShutdownCmd;
 
 /*! Default initialization for a shutdown command. */
@@ -294,7 +294,7 @@ typedef struct __iSCSIDMsgIsPortalActiveRsp {
 
 /*! Command to query target for authentication method. */
 typedef struct __iSCSIDMsgQueryTargetForAuthMethodCmd {
-    
+
     const UInt16 funcCode;
     UInt16  reserved;
     UInt32  reserved2;
@@ -309,7 +309,7 @@ extern const iSCSIDMsgQueryTargetForAuthMethodCmd iSCSIDMsgQueryTargetForAuthMet
 
 /*! Response to query a portal for authentication method. */
 typedef struct __iSCSIDMsgQueryTargetForAuthMethodRsp {
-    
+
     const UInt8 funcCode;
     UInt8 reserved;
     UInt32 errorCode;
@@ -318,12 +318,12 @@ typedef struct __iSCSIDMsgQueryTargetForAuthMethodRsp {
     UInt32 reserved3;
     UInt32 authMethod;
     UInt32 dataLength;
-    
+
 } __attribute__((packed)) iSCSIDMsgQueryTargetForAuthMethodRsp;
 
 /*! Command to get information about a session. */
 typedef struct __iSCSIDMsgCreateCFPropertiesForSessionCmd {
-    
+
     const UInt16 funcCode;
     UInt16  reserved;
     UInt32  targetLength;
@@ -331,7 +331,7 @@ typedef struct __iSCSIDMsgCreateCFPropertiesForSessionCmd {
     UInt32  reserved3;
     UInt32  reserved4;
     UInt32  reserved5;
-    
+
 } __attribute__((packed)) iSCSIDMsgCreateCFPropertiesForSessionCmd;
 
 /*! Default initialization for a get session information command. */
@@ -339,7 +339,7 @@ extern const iSCSIDMsgCreateCFPropertiesForSessionCmd iSCSIDMsgCreateCFPropertie
 
 /*! Response to command to get information about a session. */
 typedef struct __iSCSIDMsgCreateCFPropertiesForSessionRsp {
-    
+
     const UInt8 funcCode;
     UInt16 reserved;
     UInt32 errorCode;
@@ -348,12 +348,12 @@ typedef struct __iSCSIDMsgCreateCFPropertiesForSessionRsp {
     UInt32 reserved4;
     UInt32 reserved5;
     UInt32 dataLength;
-    
+
 } __attribute__((packed)) iSCSIDMsgCreateCFPropertiesForSessionRsp;
 
 /*! Command to get information about a connection. */
 typedef struct __iSCSIDMsgCreateCFPropertiesForConnectionCmd {
-    
+
     const UInt16 funcCode;
     UInt16  reserved;
     UInt32  targetLength;
@@ -361,7 +361,7 @@ typedef struct __iSCSIDMsgCreateCFPropertiesForConnectionCmd {
     UInt32  reserved2;
     UInt32  reserved3;
     UInt32  reserved4;
-    
+
 } __attribute__((packed)) iSCSIDMsgCreateCFPropertiesForConnectionCmd;
 
 /*! Default initialization for a get connection information command. */
@@ -369,7 +369,7 @@ extern const iSCSIDMsgCreateCFPropertiesForConnectionCmd iSCSIDMsgCreateCFProper
 
 /*! Response to command to get information about a connection. */
 typedef struct __iSCSIDMsgCreateCFPropertiesForConnectionRsp {
-    
+
     const UInt8 funcCode;
     UInt16 reserved;
     UInt32 errorCode;
@@ -415,7 +415,7 @@ typedef struct __iSCSIDMsgUpdateDiscoveryRsp {
 
 /*! Command IO lock and sync preferences. */
 typedef struct __iSCSIDMsgPreferencesIOLockAndSyncCmd {
-    
+
     const UInt16 funcCode;
     UInt16  reserved;
     UInt32  reserved2;
@@ -423,7 +423,7 @@ typedef struct __iSCSIDMsgPreferencesIOLockAndSyncCmd {
     UInt32  reserved4;
     UInt32  reserved5;
     UInt32  authorizationLength;
-    
+
 } __attribute__((packed)) iSCSIDMsgPreferencesIOLockAndSyncCmd;
 
 /*! Default initialization IO lock and sync preferences command. */
@@ -431,7 +431,7 @@ extern const iSCSIDMsgPreferencesIOLockAndSyncCmd iSCSIDMsgPreferencesIOLockAndS
 
 /*! Response to command IO lock and sync preferences. */
 typedef struct __iSCSIDMsgPreferencesIOLockAndSyncRsp {
-    
+
     const UInt8 funcCode;
     UInt16 reserved;
     UInt32 errorCode;
@@ -440,13 +440,13 @@ typedef struct __iSCSIDMsgPreferencesIOLockAndSyncRsp {
     UInt32 reserved4;
     UInt32 reserved5;
     UInt32 reserved6;
-    
+
 } __attribute__((packed)) iSCSIDMsgPreferencesIOLockAndSyncRsp;
 
 
 /*! Command IO unlock and sync preferences. */
 typedef struct __iSCSIDMsgPreferencesIOUnlockAndSyncCmd {
-    
+
     const UInt16 funcCode;
     UInt16  reserved;
     UInt32  reserved2;
@@ -454,7 +454,7 @@ typedef struct __iSCSIDMsgPreferencesIOUnlockAndSyncCmd {
     UInt32  reserved4;
     UInt32  reserved5;
     UInt32  preferencesLength;
-    
+
 } __attribute__((packed)) iSCSIDMsgPreferencesIOUnlockAndSyncCmd;
 
 /*! Default initialization IO unlock and sync preferences command. */
@@ -462,7 +462,7 @@ extern const iSCSIDMsgPreferencesIOUnlockAndSyncCmd iSCSIDMsgPreferencesIOUnlock
 
 /*! Response to command IO unlock and sync preferences. */
 typedef struct __iSCSIDMsgPreferencesIOUnlockAndSyncRsp {
-    
+
     const UInt8 funcCode;
     UInt16 reserved;
     UInt32 errorCode;
@@ -471,13 +471,13 @@ typedef struct __iSCSIDMsgPreferencesIOUnlockAndSyncRsp {
     UInt32 reserved4;
     UInt32 reserved5;
     UInt32 reserved6;
-    
+
 } __attribute__((packed)) iSCSIDMsgPreferencesIOUnlockAndSyncRsp;
 
 
 /*! Command to set shared a shared secret. */
 typedef struct __iSCSIDMsgSetSharedSecretCmd {
-    
+
     const UInt16 funcCode;
     UInt16  reserved;
     UInt32  reserved2;
@@ -485,7 +485,7 @@ typedef struct __iSCSIDMsgSetSharedSecretCmd {
     UInt32  authorizationLength;
     UInt32  nodeIQNLength;
     UInt32  secretLength;
-    
+
 } __attribute__((packed)) iSCSIDMsgSetSharedSecretCmd;
 
 /*! Default initialization for command to set a shared secret. */
@@ -493,7 +493,7 @@ extern const iSCSIDMsgSetSharedSecretCmd iSCSIDMsgSetSharedSecretCmdInit;
 
 /*! Response to command to set a shared secret. */
 typedef struct __iSCSIDMsgSetSharedSecretRsp {
-    
+
     const UInt8 funcCode;
     UInt16 reserved;
     UInt32 errorCode;
@@ -502,13 +502,13 @@ typedef struct __iSCSIDMsgSetSharedSecretRsp {
     UInt32 reserved4;
     UInt32 reserved5;
     UInt32 reserved6;
-    
+
 } __attribute__((packed)) iSCSIDMsgSetSharedSecretRsp;
 
 
 /*! Command to set shared a shared secret. */
 typedef struct __iSCSIDMsgRemoveSharedSecretCmd {
-    
+
     const UInt16 funcCode;
     UInt16  reserved;
     UInt32  reserved2;
@@ -516,7 +516,7 @@ typedef struct __iSCSIDMsgRemoveSharedSecretCmd {
     UInt32  reserved4;
     UInt32  authorizationLength;
     UInt32  nodeIQNLength;
-    
+
 } __attribute__((packed)) iSCSIDMsgRemoveSharedSecretCmd;
 
 /*! Default initialization for command to set a shared secret. */
@@ -524,7 +524,7 @@ extern const iSCSIDMsgRemoveSharedSecretCmd kiSCSIDMsgRemoveSharedSecretCmdInit;
 
 /*! Response to command to set a shared secret. */
 typedef struct __iSCSIDMsgRemoveSharedSecretRsp {
-    
+
     const UInt8 funcCode;
     UInt16 reserved;
     UInt32 errorCode;
@@ -533,7 +533,7 @@ typedef struct __iSCSIDMsgRemoveSharedSecretRsp {
     UInt32 reserved4;
     UInt32 reserved5;
     UInt32 reserved6;
-    
+
 } __attribute__((packed)) iSCSIDMsgRemoveSharedSecretRsp;
 
 ////////////////////////////// DAEMON FUNCTIONS ////////////////////////////////
@@ -581,16 +581,16 @@ enum iSCSIDFunctionCodes {
 
     /*! Shut down the daemon. */
     kiSCSIDShutdownDaemon = 13,
-    
+
     /*! Lock preferences mutex and synchronize provided preferences object. */
     kiSCSIDPreferencesIOLockAndSync = 14,
-    
+
     /*! Unlock preferences mutex and update application values using preferences object. */
     kiSCSIDPreferencesIOUnlockAndSync = 15,
-    
+
     /*! Set or update a SCSI shared secret. */
     kiSCSIDSetSharedSecret = 16,
-    
+
     /*! Remove a SCSI shared secret. */
     kiSCSIDRemoveSharedSecret = 17,
 

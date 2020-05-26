@@ -56,10 +56,10 @@ Boolean iSCSILVGetAnd(CFStringRef cmdStr,CFStringRef rspStr)
     CFComparisonResult cmd, rsp;
     cmd = CFStringCompare(cmdStr,kRFC3720_Value_Yes,kCFCompareCaseInsensitive);
     rsp = CFStringCompare(rspStr,kRFC3720_Value_Yes,kCFCompareCaseInsensitive);
-    
+
     if(cmd == kCFCompareEqualTo && rsp == kCFCompareEqualTo)
         return true;
-    
+
     return false;
 }
 
@@ -69,21 +69,21 @@ Boolean iSCSILVGetOr(CFStringRef cmdStr,CFStringRef rspStr)
 {
     if(CFStringCompare(cmdStr,kRFC3720_Value_Yes,kCFCompareCaseInsensitive) == kCFCompareEqualTo)
         return true;
-    
+
     if(CFStringCompare(rspStr,kRFC3720_Value_Yes,kCFCompareCaseInsensitive) == kCFCompareEqualTo)
         return true;
-    
+
     return false;
 }
 
-/*! Helper function used during session negotiation.  Converts values in 
+/*! Helper function used during session negotiation.  Converts values in
  *  the command and response strings to numbers and returns the minimum. */
 UInt32 iSCSILVGetMin(CFStringRef cmdStr, CFStringRef rspStr)
 {
     // Convert string to unsigned integers
     UInt32 cmdInt = (UInt32)CFStringGetIntValue(cmdStr);
     UInt32 rspInt = (UInt32)CFStringGetIntValue(rspStr);
-    
+
     // Compare & return minimum
     if(cmdInt < rspInt)
         return cmdInt;
@@ -97,7 +97,7 @@ UInt32 iSCSILVGetMax(CFStringRef cmdStr, CFStringRef rspStr)
     // Convert string to unsigned integers
     UInt32 cmdInt = (UInt32)CFStringGetIntValue(cmdStr);
     UInt32 rspInt = (UInt32)CFStringGetIntValue(rspStr);
-    
+
     // Compare & return minimum
     if(cmdInt > rspInt)
         return cmdInt;
@@ -120,34 +120,34 @@ void iSCSINegotiateBuildSWDictNormal(iSCSISessionConfigRef sessCfg,
                                      CFMutableDictionaryRef sessCmd)
 {
     CFStringRef value;
-    
+
     // If the maximum number of connections was specified in the target,
     // use it.  Else default to RFC3720 value
     UInt32 maxConnections = iSCSISessionConfigGetMaxConnections(sessCfg);
-    
+
     if(maxConnections == 0)
         value = CFStringCreateWithFormat(kCFAllocatorDefault,NULL,CFSTR("%u"),kRFC3720_MaxConnections);
     else
         value = CFStringCreateWithFormat(kCFAllocatorDefault,NULL,CFSTR("%u"),maxConnections);
-    
+
     CFDictionaryAddValue(sessCmd,kRFC3720_Key_MaxConnections,value);
     CFRelease(value);
-    
+
     CFDictionaryAddValue(sessCmd,kRFC3720_Key_InitialR2T,kRFC3720_Value_Yes);
     CFDictionaryAddValue(sessCmd,kRFC3720_Key_ImmediateData,kRFC3720_Value_Yes);
-    
+
     value = CFStringCreateWithFormat(kCFAllocatorDefault,NULL,CFSTR("%u"),kRFC3720_MaxBurstLength);
     CFDictionaryAddValue(sessCmd,kRFC3720_Key_MaxBurstLength,value);
     CFRelease(value);
-    
+
     value = CFStringCreateWithFormat(kCFAllocatorDefault,NULL,CFSTR("%u"),kRFC3720_FirstBurstLength);
     CFDictionaryAddValue(sessCmd,kRFC3720_Key_FirstBurstLength,value);
     CFRelease(value);
-    
+
     value = CFStringCreateWithFormat(kCFAllocatorDefault,NULL,CFSTR("%u"),kRFC3720_MaxOutstandingR2T);
     CFDictionaryAddValue(sessCmd,kRFC3720_Key_MaxOutstandingR2T,value);
     CFRelease(value);
-    
+
     CFDictionaryAddValue(sessCmd,kRFC3720_Key_DataPDUInOrder,kRFC3720_Value_Yes);
     CFDictionaryAddValue(sessCmd,kRFC3720_Key_DataSequenceInOrder,kRFC3720_Value_Yes);
 }
@@ -161,21 +161,21 @@ void iSCSINegotiateBuildSWDictCommon(iSCSISessionConfigRef sessCfg,
                                      CFMutableDictionaryRef sessCmd)
 {
     CFStringRef value;
-    
+
     // Add key-value pair for time to retain and time to wait
     value = CFStringCreateWithFormat(kCFAllocatorDefault,NULL,CFSTR("%u"),kRFC3720_DefaultTime2Wait);
     CFDictionaryAddValue(sessCmd,kRFC3720_Key_DefaultTime2Wait,value);
     CFRelease(value);
-    
+
     value = CFStringCreateWithFormat(kCFAllocatorDefault,NULL,CFSTR("%u"),kRFC3720_DefaultTime2Retain);
     CFDictionaryAddValue(sessCmd,kRFC3720_Key_DefaultTime2Retain,value);
     CFRelease(value);
-    
+
     // Add key-value pair for supported error recovery level.  Use the error
     // recovery level specified by the target.  If the value was invalid, then
     // use the RFC3720 default value of session-level instead.
     enum iSCSIErrorRecoveryLevels errorRecoveryLevel = iSCSISessionConfigGetErrorRecoveryLevel(sessCfg);
-    
+
     switch (errorRecoveryLevel) {
         case kiSCSIErrorRecoverySession:
             value = kRFC3720_Value_ErrorRecoveryLevelSession;
@@ -200,10 +200,10 @@ errno_t iSCSINegotiateParseSWDictCommon(iSCSISessionManagerRef managerRef,
 
 {
     iSCSIHBAInterfaceRef hbaInterface = iSCSISessionManagerGetHBAInterface(managerRef);
-    
+
     // Holds target value & comparison result for keys that we'll process
     CFStringRef targetRsp;
-    
+
     // Grab minimum of default time 2 retain
     if(CFDictionaryGetValueIfPresent(sessRsp,kRFC3720_Key_DefaultTime2Retain,(void*)&targetRsp))
     {
@@ -213,7 +213,7 @@ errno_t iSCSINegotiateParseSWDictCommon(iSCSISessionManagerRef managerRef,
         // Range-check value...
         if(iSCSILVRangeInvalid(defaultTime2Retain,kRFC3720_DefaultTime2Retain_Min,kRFC3720_DefaultTime2Retain_Max))
             return ENOTSUP;
-        
+
         defaultTime2Retain = iSCSILVGetMin(initCmd,targetRsp);
         iSCSIHBAInterfaceSetSessionParameter(hbaInterface,sessionId,
                                              kiSCSIHBASODefaultTime2Retain,
@@ -221,18 +221,18 @@ errno_t iSCSINegotiateParseSWDictCommon(iSCSISessionManagerRef managerRef,
     }
     else
         return ENOTSUP;
-    
-    
+
+
     // Grab maximum of default time 2 wait
     if(CFDictionaryGetValueIfPresent(sessRsp,kRFC3720_Key_DefaultTime2Wait,(void*)&targetRsp))
     {
         CFStringRef initCmd = CFDictionaryGetValue(sessCmd,kRFC3720_Key_DefaultTime2Wait);
         UInt32 defaultTime2Wait = CFStringGetIntValue(targetRsp);
-        
+
         // Range-check value...
         if(iSCSILVRangeInvalid(defaultTime2Wait,kRFC3720_DefaultTime2Wait_Min,kRFC3720_DefaultTime2Wait_Max))
             return ENOTSUP;
-        
+
         defaultTime2Wait = iSCSILVGetMin(initCmd,targetRsp);;
         iSCSIHBAInterfaceSetSessionParameter(hbaInterface,sessionId,
                                              kiSCSIHBASODefaultTime2Wait,
@@ -246,18 +246,18 @@ errno_t iSCSINegotiateParseSWDictCommon(iSCSISessionManagerRef managerRef,
     {
         CFStringRef initCmd = CFDictionaryGetValue(sessCmd,kRFC3720_Key_ErrorRecoveryLevel);
         UInt8 errorRecoveryLevel = CFStringGetIntValue(targetRsp);
-        
+
         // Range-check value...
         if(iSCSILVRangeInvalid(errorRecoveryLevel,kRFC3720_ErrorRecoveryLevel_Min,kRFC3720_ErrorRecoveryLevel_Max))
             return ENOTSUP;
-        
+
         errorRecoveryLevel = iSCSILVGetMin(initCmd,targetRsp);
         iSCSIHBAInterfaceSetSessionParameter(hbaInterface,sessionId,kiSCSIHBASOErrorRecoveryLevel,
                                  &errorRecoveryLevel,sizeof(errorRecoveryLevel));
     }
     else
         return ENOTSUP;
-    
+
     // Success
     return 0;
 }
@@ -269,23 +269,23 @@ errno_t iSCSINegotiateParseSWDictNormal(iSCSISessionManagerRef managerRef,
 
 {
     iSCSIHBAInterfaceRef hbaInterface = iSCSISessionManagerGetHBAInterface(managerRef);
-    
+
     // Holds target value & comparison result for keys that we'll process
     CFStringRef targetRsp;
-    
+
     // Holds parameters that are used to process other parameters
     Boolean initialR2T = false, immediateData = false;
-    
+
     // Get data digest key and compare to requested value
     if(CFDictionaryGetValueIfPresent(sessRsp,kRFC3720_Key_MaxConnections,(void*)&targetRsp))
     {
         CFStringRef initCmd = CFDictionaryGetValue(sessCmd,kRFC3720_Key_MaxConnections);
         UInt32 maxConnections = CFStringGetIntValue(targetRsp);
-        
+
         // Range-check value...
         if(iSCSILVRangeInvalid(maxConnections,kRFC3720_MaxConnections_Min,kRFC3720_MaxConnections_Max))
             return ENOTSUP;
-        
+
         maxConnections = iSCSILVGetMin(initCmd,targetRsp);
         iSCSIHBAInterfaceSetSessionParameter(hbaInterface,sessionId,kiSCSIHBASOMaxConnections,
                                              &maxConnections,sizeof(maxConnections));
@@ -299,7 +299,7 @@ errno_t iSCSINegotiateParseSWDictNormal(iSCSISessionManagerRef managerRef,
         iSCSIHBAInterfaceSetSessionParameter(hbaInterface,sessionId,kiSCSIHBASOInitialR2T,
                                              &initialR2T,sizeof(initialR2T));
     }
-    
+
     // Grab the AND for immediate data command and response
     if(CFDictionaryGetValueIfPresent(sessRsp,kRFC3720_Key_ImmediateData,(void*)&targetRsp))
     {
@@ -317,7 +317,7 @@ errno_t iSCSINegotiateParseSWDictNormal(iSCSISessionManagerRef managerRef,
         iSCSIHBAInterfaceSetSessionParameter(hbaInterface,sessionId,kiSCSIHBASODataPDUInOrder,
                                  &dataPDUInOrder,sizeof(dataPDUInOrder));
     }
-    
+
     // Get the OR of data PDU in order
     if(CFDictionaryGetValueIfPresent(sessRsp,kRFC3720_Key_DataSequenceInOrder,(void*)&targetRsp))
     {
@@ -341,14 +341,14 @@ errno_t iSCSINegotiateParseSWDictNormal(iSCSISessionManagerRef managerRef,
     {
         // This parameter is irrelevant when initialR2T = yes and immediateData = no.
         if(!initialR2T || immediateData) {
-        
+
             CFStringRef initCmd = CFDictionaryGetValue(sessCmd,kRFC3720_Key_FirstBurstLength);
             UInt32 firstBurstLength = CFStringGetIntValue(targetRsp);
-        
+
             // Range-check value...
             if(iSCSILVRangeInvalid(firstBurstLength,kRFC3720_FirstBurstLength_Min,kRFC3720_FirstBurstLength_Max))
                 return ENOTSUP;
-        
+
             firstBurstLength = iSCSILVGetMin(initCmd,targetRsp);
             iSCSIHBAInterfaceSetSessionParameter(hbaInterface,sessionId,kiSCSIHBASOFirstBurstLength,
                                                  &firstBurstLength,sizeof(firstBurstLength));
@@ -360,16 +360,16 @@ errno_t iSCSINegotiateParseSWDictNormal(iSCSISessionManagerRef managerRef,
     {
         CFStringRef initCmd = CFDictionaryGetValue(sessCmd,kRFC3720_Key_MaxOutstandingR2T);
         UInt32 maxOutStandingR2T = CFStringGetIntValue(targetRsp);
-        
+
         // Range-check value...
         if(iSCSILVRangeInvalid(maxOutStandingR2T,kRFC3720_MaxOutstandingR2T_Min,kRFC3720_MaxOutstandingR2T_Max))
             return ENOTSUP;
-        
+
         maxOutStandingR2T = iSCSILVGetMin(initCmd,targetRsp);
         iSCSIHBAInterfaceSetSessionParameter(hbaInterface,sessionId,kiSCSIHBASOMaxOutstandingR2T,
                                  &maxOutStandingR2T,sizeof(maxOutStandingR2T));
     }
-    
+
     // Success
     return 0;
 }
@@ -387,18 +387,18 @@ void iSCSINegotiateBuildCWDict(iSCSIConnectionConfigRef connCfg,
         CFDictionaryAddValue(connCmd,kRFC3720_Key_DataDigest,kRFC3720_Value_DataDigestCRC32C);
     else
         CFDictionaryAddValue(connCmd,kRFC3720_Key_DataDigest,kRFC3720_Value_DataDigestNone);
-    
+
     if(iSCSIConnectionConfigGetHeaderDigest(connCfg))
         CFDictionaryAddValue(connCmd,kRFC3720_Key_HeaderDigest,kRFC3720_Value_HeaderDigestCRC32C);
     else
         CFDictionaryAddValue(connCmd,kRFC3720_Key_HeaderDigest,kRFC3720_Value_HeaderDigestNone);
-    
+
     // Setup maximum received data length
     CFStringRef maxRecvLength = CFStringCreateWithFormat(
         kCFAllocatorDefault,NULL,CFSTR("%u"),kRFC3720_MaxRecvDataSegmentLength);
-    
+
     CFDictionaryAddValue(connCmd,kRFC3720_Key_MaxRecvDataSegmentLength,maxRecvLength);
-    
+
     CFRelease(maxRecvLength);
 }
 
@@ -421,63 +421,63 @@ errno_t iSCSINegotiateParseCWDict(iSCSISessionManagerRef managerRef,
 
 {
     iSCSIHBAInterfaceRef hbaInterface = iSCSISessionManagerGetHBAInterface(managerRef);
-    
+
     // Holds target value & comparison result for keys that we'll process
     CFStringRef targetRsp;
-    
+
     // Flag that indicates that target and initiator agree on a parameter
     Boolean agree = false;
-    
+
     // Get data digest key and compare to requested value
     if(CFDictionaryGetValueIfPresent(connRsp,kRFC3720_Key_DataDigest,(void*)&targetRsp))
         agree = iSCSILVGetEqual(CFDictionaryGetValue(connCmd,kRFC3720_Key_DataDigest),targetRsp);
-    
+
     // If we wanted to use data digest and target didn't set connInfo
     Boolean useDataDigest = agree && iSCSILVGetEqual(targetRsp,kRFC3720_Value_DataDigestCRC32C);
-    
+
     // Store value
     iSCSIHBAInterfaceSetConnectionParameter(hbaInterface,sessionId,connectionId,
                                             kiSCSIHBACOUseDataDigest,
                                             &useDataDigest,sizeof(useDataDigest));
     // Reset agreement flag
     agree = false;
-    
+
     // Get header digest key and compare to requested value
     if(CFDictionaryGetValueIfPresent(connRsp,kRFC3720_Key_HeaderDigest,(void*)&targetRsp))
         agree = iSCSILVGetEqual(CFDictionaryGetValue(connCmd,kRFC3720_Key_HeaderDigest),targetRsp);
-    
+
     // If we wanted to use header digest and target didn't set connInfo
     Boolean useHeaderDigest = agree && iSCSILVGetEqual(targetRsp,kRFC3720_Value_HeaderDigestCRC32C);
-    
+
     // Store value
     iSCSIHBAInterfaceSetConnectionParameter(hbaInterface,sessionId,connectionId,
                                             kiSCSIHBACOUseHeaderDigest,
                                             &useHeaderDigest,sizeof(useHeaderDigest));
-    
+
     // This option is declarative; we sent the default length, and the target
     // must accept our choice as it is within a valid range
     UInt32 maxRecvDataSegmentLength = kRFC3720_MaxRecvDataSegmentLength;
-    
+
     iSCSIHBAInterfaceSetConnectionParameter(hbaInterface,sessionId,connectionId,
                                             kiSCSIHBACOMaxRecvDataSegmentLength,
                                             &maxRecvDataSegmentLength,sizeof(maxRecvDataSegmentLength));
-    
+
     // This is the declaration made by the target as to the length it can
     // receive.  Accept the value if it is within the RFC3720 allowed range
     // otherwise, terminate the connection...
     UInt32 maxSendDataSegmentLength = kRFC3720_MaxRecvDataSegmentLength;
-    
+
     if(CFDictionaryGetValueIfPresent(connRsp,kRFC3720_Key_MaxRecvDataSegmentLength,(void*)&targetRsp))
     {
         UInt32 maxSendDataSegmentLengthRsp = CFStringGetIntValue(targetRsp);
-        
+
         // Range-check value...
         if(iSCSILVRangeInvalid(maxSendDataSegmentLengthRsp,kRFC3720_MaxRecvDataSegmentLength_Min,kRFC3720_MaxRecvDataSegmentLength_Max))
             return ENOTSUP;
-        
+
         maxSendDataSegmentLength = maxSendDataSegmentLengthRsp;
     }
-    
+
     // Store value
     iSCSIHBAInterfaceSetConnectionParameter(hbaInterface,sessionId,connectionId,
                                             kiSCSIHBACOMaxSendDataSegmentLength,
@@ -494,32 +494,32 @@ errno_t iSCSINegotiateSession(iSCSISessionManagerRef managerRef,
                               enum iSCSILoginStatusCode * statusCode)
 {
     iSCSIHBAInterfaceRef hbaInterface = iSCSISessionManagerGetHBAInterface(managerRef);
-    
+
     // Create a new dictionary for connection parameters we want to send
     CFMutableDictionaryRef sessCmd = CFDictionaryCreateMutable(
                                             kCFAllocatorDefault,
                                             kiSCSISessionMaxTextKeyValuePairs,
                                             &kCFTypeDictionaryKeyCallBacks,
                                             &kCFTypeDictionaryValueCallBacks);
-    
+
     // Add session parameters common to all session types
     iSCSINegotiateBuildSWDictCommon(sessCfg,sessCmd);
-    
+
     // If target name is specified, this is a normal session; add parameters
     Boolean discoverySession = CFStringCompare(iSCSITargetGetIQN(target),kiSCSIUnspecifiedTargetIQN,0) == kCFCompareEqualTo;
     if(!discoverySession)
         iSCSINegotiateBuildSWDictNormal(sessCfg,sessCmd);
-    
+
     // Add connection parameters
     iSCSINegotiateBuildCWDict(connCfg,sessCmd);
-    
+
     // Create a dictionary to store query response
     CFMutableDictionaryRef sessRsp = CFDictionaryCreateMutable(
                                             kCFAllocatorDefault,
                                             kiSCSISessionMaxTextKeyValuePairs,
                                             &kCFTypeDictionaryKeyCallBacks,
                                             &kCFTypeDictionaryValueCallBacks);
-    
+
     struct iSCSILoginQueryContext context;
     context.interface    = hbaInterface;
     context.sessionId    = sessionId;
@@ -529,16 +529,16 @@ errno_t iSCSINegotiateSession(iSCSISessionManagerRef managerRef,
     context.targetSessionId = 0;
 
     enum iSCSIPDURejectCode rejectCode;
-    
+
     // Send session-wide options to target and retreive a response dictionary
     errno_t error = iSCSISessionLoginQuery(&context,
                                            statusCode,
                                            &rejectCode,
                                            sessCmd,sessRsp);
-    
+
     // Parse dictionaries and store session parameters if no I/O error occured
     if(*statusCode == kiSCSILoginSuccess) {
-        
+
         // The TSIH was recorded by iSCSISessionLoginQuery since we're
         // entering the full-feature phase (see iSCSISessionLoginQuery documentation)
         iSCSIHBAInterfaceSetSessionParameter(hbaInterface,sessionId,
@@ -546,20 +546,20 @@ errno_t iSCSINegotiateSession(iSCSISessionManagerRef managerRef,
                                              &context.targetSessionId,sizeof(context.targetSessionId));
         if(!error)
             error = iSCSINegotiateParseSWDictCommon(managerRef,sessionId,sessCmd,sessRsp);
-    
+
         if(!error && iSCSITargetGetIQN(target) != NULL)
             error = iSCSINegotiateParseSWDictNormal(managerRef,sessionId,sessCmd,sessRsp);
-    
+
         if(!error)
             error = iSCSINegotiateParseCWDict(managerRef,sessionId,connectionId,sessCmd,sessRsp);
     }
-    
+
     // If no error and the target returned an alias save it...
     CFStringRef targetAlias;
     if(!error && CFDictionaryGetValueIfPresent(sessRsp,kRFC3720_Key_TargetAlias,(const void **)&targetAlias)) {
         iSCSITargetSetAlias(target,targetAlias);
     }
-    
+
     CFRelease(sessCmd);
     CFRelease(sessRsp);
     return error;
@@ -581,7 +581,7 @@ errno_t iSCSINegotiateConnection(iSCSISessionManagerRef managerRef,
                                             kiSCSISessionMaxTextKeyValuePairs,
                                             &kCFTypeDictionaryKeyCallBacks,
                                             &kCFTypeDictionaryValueCallBacks);
-    
+
     // Populate dictionary with connection options based on connInfo
     iSCSINegotiateBuildCWDict(target,connCmd);
 
@@ -605,7 +605,7 @@ errno_t iSCSINegotiateConnection(iSCSISessionManagerRef managerRef,
     // cannot set TSIH to 0.
     iSCSIHBAInterfaceGetSessionParameter(hbaInterface,sessionId,kiSCSIHBASOTargetSessionId,
                                          &context.targetSessionId,sizeof(context.targetSessionId));
-    
+
     // If the target session ID is non-zero, we're simply adding a new
     // connection and we can enter the full feature after this negotiation.
     if(context.targetSessionId != 0)
@@ -623,7 +623,7 @@ errno_t iSCSINegotiateConnection(iSCSISessionManagerRef managerRef,
     // If no error, parse received dictionary and store connection options
     if(!error && *statusCode == kiSCSILoginSuccess)
         error = iSCSINegotiateParseCWDict(managerRef,sessionId,connectionId,connCmd,connRsp);
-    
+
     CFRelease(connCmd);
     CFRelease(connRsp);
     return error;
@@ -638,33 +638,33 @@ errno_t iSCSISessionLogoutCommon(iSCSISessionManagerRef managerRef,
 {
     if(sessionId >= kiSCSIInvalidSessionId || connectionId >= kiSCSIInvalidConnectionId)
         return EINVAL;
-    
+
     iSCSIHBAInterfaceRef hbaInterface = iSCSISessionManagerGetHBAInterface(managerRef);
     errno_t error = 0;
-    
+
     // Create a logout PDU and log out of the session
     iSCSIPDULogoutReqBHS cmd = iSCSIPDULogoutReqBHSInit;
     cmd.reasonCode = logoutReason | kISCSIPDULogoutReasonCodeFlag;
-    
+
     if((error = iSCSIHBAInterfaceSend(hbaInterface,sessionId,connectionId,(iSCSIPDUInitiatorBHS *)&cmd,NULL,0)))
         return error;
-    
+
     // Get response from iSCSI portal
     iSCSIPDULogoutRspBHS rsp;
     void * data = NULL;
     size_t length = 0;
-    
+
     // Receive response PDU...
     if((error = iSCSIHBAInterfaceReceive(hbaInterface,sessionId,connectionId,(iSCSIPDUTargetBHS *)&rsp,&data,&length)))
         return error;
-    
+
     if(rsp.opCode == kiSCSIPDUOpCodeLogoutRsp)
         *statusCode = rsp.response;
-    
+
     // For this case some other kind of PDU or invalid data was received
     else if(rsp.opCode == kiSCSIPDUOpCodeReject)
         error = EINVAL;
-    
+
     iSCSIPDUDataRelease(data);
     return error;
 }
@@ -694,13 +694,13 @@ errno_t iSCSISessionAddConnection(iSCSISessionManagerRef managerRef,
     iSCSIHBAInterfaceRef hbaInterface = iSCSISessionManagerGetHBAInterface(managerRef);
     *connectionId = kiSCSIInvalidConnectionId;
     errno_t error = 0;
-    
+
     // Resolve information about the target
     struct sockaddr_storage ssTarget, ssHost;
-    
+
     if((error = iSCSIUtilsGetAddressForPortal(portal,&ssTarget,&ssHost)))
         return error;
-    
+
     // If both target and host were resolved, grab a connection
     error = iSCSIHBAInterfaceCreateConnection(hbaInterface,sessionId,
                                               iSCSIPortalGetAddress(portal),
@@ -708,24 +708,24 @@ errno_t iSCSISessionAddConnection(iSCSISessionManagerRef managerRef,
                                               iSCSIPortalGetHostInterface(portal),
                                               &ssTarget,
                                               &ssHost,connectionId);
-    
+
     // If we can't accomodate a new connection quit; try again later
     if(error || *connectionId == kiSCSIInvalidConnectionId)
         return EAGAIN;
-    
+
     iSCSITargetRef targetTemp = iSCSISessionCopyTargetForId(managerRef,sessionId);
     iSCSIMutableTargetRef target = iSCSITargetCreateMutableCopy(targetTemp);
     iSCSITargetRelease(targetTemp);
-    
+
     // If no error, authenticate (negotiate security parameters)
     if(!error && *statusCode == kiSCSILoginSuccess)
        error = iSCSIAuthNegotiate(managerRef,target,initiatorAuth,targetAuth,sessionId,*connectionId,statusCode);
-    
+
     if(!error && *statusCode == kiSCSILoginSuccess)
         iSCSIHBAInterfaceActivateConnection(hbaInterface,sessionId,*connectionId);
     else
         iSCSIHBAInterfaceReleaseConnection(hbaInterface,sessionId,*connectionId);
-    
+
     iSCSITargetRelease(target);
     return 0;
 }
@@ -737,19 +737,19 @@ errno_t iSCSISessionRemoveConnection(iSCSISessionManagerRef managerRef,
 {
     if(sessionId >= kiSCSIInvalidSessionId || connectionId >= kiSCSIInvalidConnectionId)
         return EINVAL;
-    
+
     iSCSIHBAInterfaceRef hbaInterface = iSCSISessionManagerGetHBAInterface(managerRef);
     errno_t error = 0;
-    
+
     // Release the session instead if there's only a single connection
     // for this session
     UInt32 numConnections = 0;
     if((error = iSCSIHBAInterfaceGetNumConnections(hbaInterface,sessionId,&numConnections)))
         return error;
-    
+
     if(numConnections == 1)
         return iSCSISessionLogout(managerRef,sessionId,statusCode);
-    
+
     // Deactivate connection before we remove it (this is optional but good
     // practice, as the kernel will deactivate the connection for us).
     if(!(error = iSCSIHBAInterfaceDeactivateConnection(hbaInterface,sessionId,connectionId))) {
@@ -759,7 +759,7 @@ errno_t iSCSISessionRemoveConnection(iSCSISessionManagerRef managerRef,
     }
     // Release the connection in the kernel
     iSCSIHBAInterfaceReleaseConnection(hbaInterface,sessionId,connectionId);
-    
+
     return error;
 }
 
@@ -789,13 +789,13 @@ errno_t iSCSISessionLogin(iSCSISessionManagerRef managerRef,
     if(!target || !portal || !sessCfg || !connCfg || !sessionId || !connectionId ||
        !statusCode || !initiatorAuth || !targetAuth)
         return EINVAL;
-    
+
     iSCSIHBAInterfaceRef hbaInterface = iSCSISessionManagerGetHBAInterface(managerRef);
     errno_t error = 0;
-    
+
     // Resolve the target address
     struct sockaddr_storage ssTarget, ssHost;
-    
+
     if((error = iSCSIUtilsGetAddressForPortal(portal,&ssTarget,&ssHost)))
         return error;
 
@@ -807,7 +807,7 @@ errno_t iSCSISessionLogin(iSCSISessionManagerRef managerRef,
                                            iSCSIPortalGetPort(portal),
                                            iSCSIPortalGetHostInterface(portal),
                                            &ssTarget,&ssHost,sessionId,connectionId);
-    
+
     // If session couldn't be allocated were maxed out; try again later
     if(!error && (*sessionId == kiSCSIInvalidSessionId || *connectionId == kiSCSIInvalidConnectionId))
         return EAGAIN;
@@ -828,13 +828,13 @@ errno_t iSCSISessionLogin(iSCSISessionManagerRef managerRef,
         iSCSIHBAInterfaceReleaseSession(hbaInterface,*sessionId);
     else if(CFStringCompare(iSCSITargetGetIQN(target),kiSCSIUnspecifiedTargetIQN,0) != kCFCompareEqualTo)
         iSCSIHBAInterfaceActivateConnection(hbaInterface,*sessionId,*connectionId);
-    
+
     return error;
 }
 
 /*! Closes the iSCSI session by deactivating and removing all connections. Any
- *  pending or current data transfers are aborted. This function may be called 
- *  on a session with one or more connections that are either inactive or 
+ *  pending or current data transfers are aborted. This function may be called
+ *  on a session with one or more connections that are either inactive or
  *  active. The session identifier is released and may be reused by other
  *  sessions the future.
  *  @param sessionId the session to release.
@@ -845,14 +845,14 @@ errno_t iSCSISessionLogout(iSCSISessionManagerRef managerRef,
 {
     if(sessionId == kiSCSIInvalidSessionId)
         return  EINVAL;
-    
+
     iSCSIHBAInterfaceRef hbaInterface = iSCSISessionManagerGetHBAInterface(managerRef);
     errno_t error = 0;
 
     // First deactivate all of the connections
     if((error = iSCSIHBAInterfaceDeactivateAllConnections(hbaInterface,sessionId)))
         return error;
-    
+
     // Grab a handle to any connection so we can logout of the session
     ConnectionIdentifier connectionId = kiSCSIInvalidConnectionId;
     if(!(error = iSCSIHBAInterfaceGetConnection(hbaInterface,sessionId,&connectionId)))
@@ -860,7 +860,7 @@ errno_t iSCSISessionLogout(iSCSISessionManagerRef managerRef,
 
     // Release all of the connections in the kernel by releasing the session
     iSCSIHBAInterfaceReleaseSession(hbaInterface,sessionId);
-    
+
     return error;
 }
 
@@ -870,7 +870,7 @@ void iSCSIPDUDataParseToDiscoveryRecCallback(void * keyContainer,CFStringRef key
                                              void * valContainer,CFStringRef val)
 {
     static CFStringRef targetIQN = NULL;
-    
+
     // If the discovery data has a "TargetName = xxx" field, we're starting
     // a record for a new target
     if(CFStringCompare(key,kRFC3720_Key_TargetName,0) == kCFCompareEqualTo)
@@ -887,25 +887,25 @@ void iSCSIPDUDataParseToDiscoveryRecCallback(void * keyContainer,CFStringRef key
         CFArrayRef targetAddress = CFStringCreateArrayBySeparatingStrings(kCFAllocatorDefault,val,CFSTR(","));
         CFStringRef addressAndPort = CFArrayGetValueAtIndex(targetAddress,0);
         CFStringRef portalGroupTag = CFArrayGetValueAtIndex(targetAddress,1);
-        
+
         // Split the address and port, construct an iSCSIPortal object (do the
         // search for a ":" backwards since IPv6 addresses use ":" as
         // separators and the address can be IPv4/IPv6 or a domain name.
         CFRange sepRange = CFStringFind(addressAndPort,CFSTR(":"),kCFCompareBackwards);
         CFRange addressRange = CFRangeMake(0,sepRange.location);
         CFRange portRange = CFRangeMake(sepRange.location+1,CFStringGetLength(addressAndPort)-(sepRange.location+1));
-        
+
         CFStringRef address = CFStringCreateWithSubstring(kCFAllocatorDefault,addressAndPort,addressRange);
         CFStringRef port = CFStringCreateWithSubstring(kCFAllocatorDefault,addressAndPort,portRange);
-        
+
         iSCSIMutablePortalRef portal = iSCSIPortalCreateMutable();
         iSCSIPortalSetAddress(portal,address);
         iSCSIPortalSetPort(portal,port);
         iSCSIPortalSetHostInterface(portal,kiSCSIDefaultHostInterface);
-    
+
         iSCSIMutableDiscoveryRecRef discoveryRec = (iSCSIMutableDiscoveryRecRef)(valContainer);
         iSCSIDiscoveryRecAddPortal(discoveryRec,targetIQN,portalGroupTag,portal);
-        
+
         CFRelease(port);
         CFRelease(address);
         CFRelease(targetAddress);
@@ -931,15 +931,15 @@ errno_t iSCSIQueryPortalForTargets(iSCSISessionManagerRef managerRef,
 {
     if(!portal || !discoveryRec)
         return EINVAL;
-    
+
     // Create a discovery session to the portal (empty target name is assumed to
     // be a discovery session)
     iSCSIMutableTargetRef target = iSCSITargetCreateMutable();
     iSCSITargetSetIQN(target,kiSCSIUnspecifiedTargetIQN);
-    
+
     SessionIdentifier sessionId;
     ConnectionIdentifier connectionId;
-    
+
     iSCSIMutableSessionConfigRef sessCfg = iSCSISessionConfigCreateMutable();
     iSCSIMutableConnectionConfigRef connCfg = iSCSIConnectionConfigCreateMutable();
 
@@ -953,46 +953,46 @@ errno_t iSCSIQueryPortalForTargets(iSCSISessionManagerRef managerRef,
     iSCSITargetRelease(target);
     iSCSISessionConfigRelease(sessCfg);
     iSCSIConnectionConfigRelease(connCfg);
-    
+
     if(error)
         return error;
-    
+
     // Place text commands to get target list into a dictionary
     CFMutableDictionaryRef textCmd =
         CFDictionaryCreateMutable(kCFAllocatorDefault,
                                   kiSCSISessionMaxTextKeyValuePairs,
                                   &kCFTypeDictionaryKeyCallBacks,
                                   &kCFTypeDictionaryValueCallBacks);
-    
+
     // Can't use a text query; must manually send/receive as the received
     // keys will be duplicates and CFDictionary doesn't support them
     CFDictionarySetValue(textCmd,kRFC3720_Key_SendTargets,kRFC3720_Value_SendTargetsAll);
-     
+
     // Create a data segment based on text commands (key-value pairs)
     void * data;
     size_t length;
     iSCSIPDUDataCreateFromDict(textCmd,&data,&length);
-    
+
     iSCSIPDUTextReqBHS cmd = iSCSIPDUTextReqBHSInit;
     cmd.textReqStageFlags |= kiSCSIPDUTextReqFinalFlag;
     cmd.targetTransferTag = kiSCSIPDUTargetTransferTagReserved;
-    
+
     iSCSIHBAInterfaceRef hbaInterface = iSCSISessionManagerGetHBAInterface(managerRef);
     error = iSCSIHBAInterfaceSend(hbaInterface,sessionId,connectionId,(iSCSIPDUInitiatorBHS *)&cmd,data,length);
-    
+
     iSCSIPDUDataRelease(&data);
     CFRelease(textCmd);
-     
+
     if(error)
     {
         enum iSCSILogoutStatusCode statusCode;
         iSCSISessionLogout(managerRef,sessionId,&statusCode);
         return error;
     }
-    
+
     // Get response from iSCSI portal, continue until response is complete
     iSCSIPDUTextRspBHS rsp;
-    
+
     *discoveryRec = iSCSIDiscoveryRecCreateMutable();
 
     do {
@@ -1005,7 +1005,7 @@ errno_t iSCSIQueryPortalForTargets(iSCSISessionManagerRef managerRef,
 
             return error;
         }
-     
+
         if(rsp.opCode == kiSCSIPDUOpCodeTextRsp)
         {
             iSCSIPDUDataParseCommon(data,length,NULL,*discoveryRec,
@@ -1019,9 +1019,9 @@ errno_t iSCSIQueryPortalForTargets(iSCSISessionManagerRef managerRef,
         }
     }
     while(rsp.textReqStageBits & kiSCSIPDUTextReqContinueFlag);
-     
+
     iSCSIPDUDataRelease(&data);
-    
+
     enum iSCSILogoutStatusCode logoutStatusCode;
     iSCSISessionLogout(managerRef,sessionId,&logoutStatusCode);
 
@@ -1076,17 +1076,17 @@ errno_t iSCSIQueryTargetForAuthMethod(iSCSISessionManagerRef managerRef,
 
     iSCSIHBAInterfaceRef hbaInterface = iSCSISessionManagerGetHBAInterface(managerRef);
     errno_t error = 0;
-    
+
     // Resolve information about the target
     struct sockaddr_storage ssTarget, ssHost;
-    
+
     if((error = iSCSIUtilsGetAddressForPortal(portal,&ssTarget,&ssHost)))
         return error;
-    
+
     // Create a discovery session to the portal
     iSCSIMutableTargetRef target = iSCSITargetCreateMutable();
     iSCSITargetSetIQN(target,targetIQN);
-    
+
     // Create session (incl. qualifier) and a new connection (incl. Id)
     // Reset qualifier and connection ID by default
     SessionIdentifier sessionId;
@@ -1100,7 +1100,7 @@ errno_t iSCSIQueryTargetForAuthMethod(iSCSISessionManagerRef managerRef,
                                      &ssHost,
                                      &sessionId,
                                      &connectionId);
-    
+
     // If no error, authenticate (negotiate security parameters)
     if(!error)
         error = iSCSIAuthInterrogate(managerRef,
@@ -1112,7 +1112,7 @@ errno_t iSCSIQueryTargetForAuthMethod(iSCSISessionManagerRef managerRef,
 
     iSCSIHBAInterfaceReleaseSession(hbaInterface,sessionId);
     iSCSITargetRelease(target);
-    
+
     return error;
 }
 
@@ -1149,7 +1149,7 @@ CFArrayRef iSCSISessionCopyArrayOfSessionIds(iSCSISessionManagerRef managerRef)
 
     if(iSCSIHBAInterfaceGetSessionIds(hbaInterface,sessionIds,&sessionCount))
         return NULL;
-    
+
     return CFArrayCreate(kCFAllocatorDefault,(const void **) sessionIds,sessionCount,NULL);
 }
 
@@ -1161,11 +1161,11 @@ CFArrayRef iSCSISessionCopyArrayOfConnectionIds(iSCSISessionManagerRef managerRe
 {
     if(sessionId == kiSCSIInvalidSessionId)
         return NULL;
-    
+
     iSCSIHBAInterfaceRef hbaInterface = iSCSISessionManagerGetHBAInterface(managerRef);
     ConnectionIdentifier connectionIds[kiSCSIMaxConnectionsPerSession];
     UInt32 connectionCount;
-    
+
     if(iSCSIHBAInterfaceGetConnectionIds(hbaInterface,sessionId,connectionIds,&connectionCount))
         return NULL;
 
@@ -1179,18 +1179,18 @@ iSCSITargetRef iSCSISessionCopyTargetForId(iSCSISessionManagerRef managerRef,Ses
 {
     if(sessionId == kiSCSIInvalidSessionId)
         return NULL;
-    
+
     iSCSIHBAInterfaceRef hbaInterface = iSCSISessionManagerGetHBAInterface(managerRef);
     CFStringRef targetIQN = iSCSIHBAInterfaceCreateTargetIQNForSessionId(hbaInterface,sessionId);
-    
+
     if(!targetIQN)
         return NULL;
-    
+
     iSCSIMutableTargetRef target = iSCSITargetCreateMutable();
     iSCSITargetSetIQN(target,targetIQN);
 
     CFRelease(targetIQN);
-    
+
     return target;
 }
 
@@ -1201,14 +1201,14 @@ iSCSITargetRef iSCSISessionCopyTargetForId(iSCSISessionManagerRef managerRef,Ses
 iSCSIPortalRef iSCSISessionCopyPortalForConnectionId(iSCSISessionManagerRef managerRef,
                                                 SessionIdentifier sessionId,
                                                 ConnectionIdentifier connectionId)
-                                      
+
 {
     if(sessionId == kiSCSIInvalidSessionId || connectionId == kiSCSIInvalidConnectionId)
         return NULL;
-    
+
     iSCSIHBAInterfaceRef hbaInterface = iSCSISessionManagerGetHBAInterface(managerRef);
     CFStringRef address,port,hostInterface;
-    
+
     if(!(address = iSCSIHBAInterfaceCreatePortalAddressForConnectionId(hbaInterface,sessionId,connectionId)))
         return NULL;
 
@@ -1217,14 +1217,14 @@ iSCSIPortalRef iSCSISessionCopyPortalForConnectionId(iSCSISessionManagerRef mana
         CFRelease(address);
         return NULL;
     }
-    
+
     if(!(hostInterface = iSCSIHBAInterfaceCreateHostInterfaceForConnectionId(hbaInterface,sessionId,connectionId)))
     {
         CFRelease(address);
         CFRelease(port);
         return NULL;
     }
-    
+
     iSCSIMutablePortalRef portal = iSCSIPortalCreateMutable();
     iSCSIPortalSetAddress(portal,address);
     iSCSIPortalSetPort(portal,port);
@@ -1232,7 +1232,7 @@ iSCSIPortalRef iSCSISessionCopyPortalForConnectionId(iSCSISessionManagerRef mana
     CFRelease(address);
     CFRelease(port);
     CFRelease(hostInterface);
-    
+
     return portal;
 }
 
@@ -1250,15 +1250,15 @@ CFDictionaryRef iSCSISessionCopyCFPropertiesForTarget(iSCSISessionManagerRef man
 
     iSCSIHBAInterfaceRef hbaInterface = iSCSISessionManagerGetHBAInterface(managerRef);
     CFDictionaryRef dictionary = NULL;
-    
+
     SessionIdentifier sessionId = iSCSISessionGetSessionIdForTarget(managerRef,iSCSITargetGetIQN(target));
-    
+
     if(sessionId == kiSCSIInvalidSessionId)
         return NULL;
-    
+
     // Get session options from kernel
     UInt32 paramVal32 = 0;
-    
+
     iSCSIHBAInterfaceGetSessionParameter(hbaInterface,sessionId,kiSCSIHBASOMaxConnections,&paramVal32,sizeof(paramVal32));
     CFNumberRef maxConnections = CFNumberCreate(kCFAllocatorDefault,kCFNumberIntType,&paramVal32);
 
@@ -1273,10 +1273,10 @@ CFDictionaryRef iSCSISessionCopyCFPropertiesForTarget(iSCSISessionManagerRef man
 
     iSCSIHBAInterfaceGetSessionParameter(hbaInterface,sessionId,kiSCSIHBASODefaultTime2Retain,&paramVal32,sizeof(paramVal32));
     CFNumberRef defaultTime2Retain = CFNumberCreate(kCFAllocatorDefault,kCFNumberIntType,&paramVal32);
-    
+
     iSCSIHBAInterfaceGetSessionParameter(hbaInterface,sessionId,kiSCSIHBASODefaultTime2Wait,&paramVal32,sizeof(paramVal32));
     CFNumberRef defaultTime2Wait = CFNumberCreate(kCFAllocatorDefault,kCFNumberIntType,&paramVal32);
-    
+
 
     TargetPortalGroupTag tpgt = 0;
     iSCSIHBAInterfaceGetSessionParameter(hbaInterface,sessionId,kiSCSIHBASOTargetPortalGroupTag,&tpgt,sizeof(TargetPortalGroupTag));
@@ -1291,14 +1291,14 @@ CFDictionaryRef iSCSISessionCopyCFPropertiesForTarget(iSCSISessionManagerRef man
     CFNumberRef errorRecoveryLevel = CFNumberCreate(kCFAllocatorDefault,kCFNumberSInt8Type,&paramVal8);
 
     CFNumberRef sessionIdentifier = CFNumberCreate(kCFAllocatorDefault,kCFNumberSInt16Type,&sessionId);
-    
+
     CFStringRef initialR2T = kRFC3720_Value_No;
     CFStringRef immediateData = kRFC3720_Value_No;
     CFStringRef dataPDUInOrder = kRFC3720_Value_No;
     CFStringRef dataSequenceInOrder = kRFC3720_Value_No;
 
     Boolean paramValBool = false;
-    
+
     iSCSIHBAInterfaceGetSessionParameter(hbaInterface,sessionId,kiSCSIHBASOImmediateData,&paramValBool,sizeof(Boolean));
     if(paramValBool)
         immediateData = kRFC3720_Value_Yes;
@@ -1384,21 +1384,21 @@ CFDictionaryRef iSCSISessionCopyCFPropertiesForPortal(iSCSISessionManagerRef man
     connectionId = iSCSISessionGetConnectionIdForPortal(managerRef,sessionId,portal);
     if(connectionId == kiSCSIInvalidConnectionId)
         return NULL;
-    
+
     // Get connection options from kernel
 
     UInt32 paramVal32 = 0;
     iSCSIHBAInterfaceGetConnectionParameter(hbaInterface,sessionId,connectionId,kiSCSIHBACOMaxRecvDataSegmentLength,&paramVal32,sizeof(paramVal32));
     CFNumberRef maxRecvDataSegmentLength = CFNumberCreate(kCFAllocatorDefault,kCFNumberIntType,&paramVal32);
-    
+
     CFNumberRef connectionIdentifier = CFNumberCreate(kCFAllocatorDefault,kCFNumberIntType,&connectionId);
-    
+
 
     enum iSCSIDigestTypes dataDigestType = kiSCSIDigestNone;
     enum iSCSIDigestTypes headerDigestType = kiSCSIDigestNone;
 
     Boolean paramValBool = false;
-    
+
     iSCSIHBAInterfaceGetConnectionParameter(hbaInterface,sessionId,connectionId,kiSCSIHBACOUseDataDigest,&paramValBool,sizeof(Boolean));
     if(paramValBool)
         dataDigestType = kiSCSIDigestCRC32C;

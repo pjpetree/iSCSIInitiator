@@ -35,14 +35,14 @@
 #include <Security/Security.h>
 
 enum iSCSIAuthRights {
-    
+
     /*! The right to login and logout. */
     kiSCSIAuthLoginRight,
-    
+
     /*! The right to make modifications to the initiator, including
      *  modification of settings, addition/removal of targets, etc. */
     kiSCSIAuthModifyRight,
-    
+
     /*! All authentication rights. */
     kiSCSIAuthAllRights
 };

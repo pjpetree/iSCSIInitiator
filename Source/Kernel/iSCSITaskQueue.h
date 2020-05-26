@@ -43,66 +43,66 @@ struct iSCSITask;
  *  it receives them from the SCSI layer by calling queueTask().
  *  This queue will invoke a callback function gated against
  *  the HBA workloop to process new tasks as existing tasks are completed.
- *  Once the task is processed, the HBA should call completeCurrentTask() to 
+ *  Once the task is processed, the HBA should call completeCurrentTask() to
  *  let the queue know that the task has been processed. */
 class iSCSITaskQueue : public IOEventSource
 {
     OSDeclareDefaultStructors(iSCSITaskQueue);
 
 public:
-    
+
     /*! Pointer to the method that is called (within the driver's workloop)
-	 *	when data becomes available at a network socket. */
+     *  when data becomes available at a network socket. */
     typedef bool (*Action) (iSCSIVirtualHBA * owner,
                             iSCSISession * session,
                             iSCSIConnection * connection,
                             UInt32 initiatorTaskTag);
-	
-	/*! Initializes the event source with an owner and an action.
-	 *	@param owner the owner that this event source will be attached to.
-	 *	@param action pointer to a function to call when processing
-	 *	interrupts.  This function is called by checkForWork() and executes in
-	 *	the owner's workloop.
-	 *	@param session the session object.
+
+    /*! Initializes the event source with an owner and an action.
+     *  @param owner the owner that this event source will be attached to.
+     *  @param action pointer to a function to call when processing
+     *  interrupts.  This function is called by checkForWork() and executes in
+     *  the owner's workloop.
+     *  @param session the session object.
      *  @param connection the connection object.
-	 *	@return true if the event source was successfully initialized. */
-	virtual bool init(iSCSIVirtualHBA * owner,
+     *  @return true if the event source was successfully initialized. */
+    virtual bool init(iSCSIVirtualHBA * owner,
                       iSCSITaskQueue::Action action,
                       iSCSISession * session,
                       iSCSIConnection * connection);
-    
-    /*! Queues a new iSCSI task for delayed processing. 
+
+    /*! Queues a new iSCSI task for delayed processing.
      *  @param initiatorTaskTag the iSCSI task tag associated with the task. */
     void queueTask(UInt32 initiatorTaskTag);
-    
+
     /*! Removes a task from the queue (either the task has been successfully
      *  completed or aborted).
      *  @return the iSCSI task tag for the task that was just completed. */
     UInt32 completeCurrentTask();
-    
+
     /*! Removes all tasks from the queue. */
     void clearTasksFromQueue();
-    
+
 protected:
-    
+
     /*! Called by the attached work loop to check if there is any processing
-	 *	to be completed.  This fu	nction will call the action method pointed
-	 *	to by this object.
-	 *	@return true if there was work, false otherwise. */
-	virtual bool checkForWork();
+     *  to be completed.  This fu   nction will call the action method pointed
+     *  to by this object.
+     *  @return true if there was work, false otherwise. */
+    virtual bool checkForWork();
 
 private:
-    
+
     /*! The iSCSI session associated with this event source. */
     iSCSISession * session;
-    
+
     /*! The iSCSI connection associated with this event source. */
     iSCSIConnection * connection;
-    
+
     queue_head_t taskQueue;
-    
+
     bool newTask;
-    
+
 };
 
 #endif

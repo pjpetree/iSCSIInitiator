@@ -331,12 +331,12 @@ Boolean iSCSIPreferencesContainsPortalForSendTargetsDiscovery(iSCSIPreferencesRe
  *  @return an array of target iSCSI qualified name (IQN)s. */
 CFArrayRef iSCSIPreferencesCreateArrayOfTargets(iSCSIPreferencesRef preferences);
 
-/*! Creates an array of iSCSI targets (IQNs) that were dynamically configured 
+/*! Creates an array of iSCSI targets (IQNs) that were dynamically configured
  *  using SendTargets over a specific discovery portal.
  *  @param preferences an iSCSI preferences object.
  *  @param portalAddress the address of the discovery portal that corresponds
  *  to the dynamically configured discovery targets.
- *  @return an array of iSCSI targets (IQNs) that were discovered using 
+ *  @return an array of iSCSI targets (IQNs) that were discovered using
  *  SendTargets over the specified portal. */
 CFArrayRef iSCSIPreferencesCreateArrayOfDynamicTargetsForSendTargets(iSCSIPreferencesRef preferences,
                                                             CFStringRef portalAddress);

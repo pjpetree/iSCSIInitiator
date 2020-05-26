@@ -43,7 +43,7 @@ iSCSIPortalRef iSCSIPortalCreateWithData(CFDataRef data)
     CFPropertyListFormat format;
     iSCSIPortalRef portal = CFPropertyListCreateWithData(
             kCFAllocatorDefault,data,kCFPropertyListImmutable,&format,NULL);
-    
+
     if(format == kCFPropertyListBinaryFormat_v1_0)
         return portal;
 
@@ -58,7 +58,7 @@ iSCSIMutablePortalRef iSCSIPortalCreateMutable()
     CFDictionaryAddValue(portal,kiSCSIPortalAddresssKey,CFSTR(""));
     CFDictionaryAddValue(portal,kiSCSIPortalPortKey,kiSCSIDefaultPort);
     CFDictionaryAddValue(portal,kiSCSIPortalHostInterfaceKey,kiSCSIDefaultHostInterface);
-    
+
     return portal;
 }
 
@@ -135,7 +135,7 @@ CFDataRef iSCSIPortalCreateData(iSCSIPortalRef portal)
 iSCSISessionConfigRef iSCSITargetCreateWithData(CFDataRef data)
 {
     CFPropertyListFormat format;
-    
+
     iSCSITargetRef target = CFPropertyListCreateWithData(kCFAllocatorDefault,data,0,&format,NULL);
 
     if(format == kCFPropertyListBinaryFormat_v1_0)
@@ -180,7 +180,7 @@ void iSCSITargetSetIQN(iSCSIMutableTargetRef target,CFStringRef IQN)
     // Ignore blanks
     if(CFStringCompare(IQN,CFSTR(""),0) == kCFCompareEqualTo)
         return;
-    
+
     CFDictionarySetValue(target,kiSCSITargetIQNKey,IQN);
 }
 
@@ -196,7 +196,7 @@ void iSCSITargetSetAlias(iSCSIMutableTargetRef target,CFStringRef alias)
     // Ignore blanks
     if(CFStringCompare(alias,CFSTR(""),0) == kCFCompareEqualTo)
         return;
-    
+
     CFDictionarySetValue(target,kiSCSITargetAliasKey,alias);
 }
 
@@ -234,12 +234,12 @@ CFDataRef iSCSITargetCreateData(iSCSITargetRef target)
 iSCSIAuthRef iSCSIAuthCreateWithData(CFDataRef data)
 {
     CFPropertyListFormat format;
-    
+
     iSCSIAuthRef auth = CFPropertyListCreateWithData(kCFAllocatorDefault,data,0,&format,NULL);
 
     if(format == kCFPropertyListBinaryFormat_v1_0)
         return auth;
-    
+
     CFRelease(auth);
     return NULL;
 }
@@ -250,7 +250,7 @@ iSCSIAuthRef iSCSIAuthCreateNone()
 {
     const void * keys[] = {CFSTR("Authentication Method")};
     const void * values[] = {CFSTR("None")};
-    
+
     return CFDictionaryCreate(kCFAllocatorDefault,keys,values,1,&kCFTypeDictionaryKeyCallBacks,&kCFTypeDictionaryValueCallBacks);
 }
 
@@ -266,13 +266,13 @@ iSCSIAuthRef iSCSIAuthCreateCHAP(CFStringRef name,
     // Required parameters
     if(!name || !sharedSecret)
         return NULL;
-    
+
     const void * keys[] = {
         CFSTR("Authentication Method"),
         CFSTR("User"),
         CFSTR("Shared Secret"),
     };
-    
+
     const void * values[] = {
         CFSTR("CHAP"),
         name,
@@ -304,16 +304,16 @@ void iSCSIAuthGetCHAPValues(iSCSIAuthRef auth,
 enum iSCSIAuthMethods iSCSIAuthGetMethod(iSCSIAuthRef auth)
 {
     CFStringRef authMethod = CFDictionaryGetValue(auth,CFSTR("Authentication Method"));
-    
+
     if(!authMethod)
         return kiSCSIAuthMethodInvalid;
-    
+
     if(CFStringCompare(authMethod,CFSTR("CHAP"),0) == kCFCompareEqualTo)
         return kiSCSIAuthMethodCHAP;
-    
+
     else if(CFStringCompare(authMethod,CFSTR("None"),0) == kCFCompareEqualTo)
         return kiSCSIAuthMethodNone;
-    
+
     return kiSCSIAuthMethodInvalid;
 }
 
@@ -375,13 +375,13 @@ iSCSIMutableDiscoveryRecRef iSCSIDiscoveryRecCreateMutableWithData(CFDataRef dat
     CFPropertyListFormat format;
     iSCSIMutableDiscoveryRecRef discoveryRec = (iSCSIMutableDiscoveryRecRef)
         CFPropertyListCreateWithData(kCFAllocatorDefault,data,kCFPropertyListImmutable,&format,NULL);
-    
+
     if(format == kCFPropertyListBinaryFormat_v1_0)
         return discoveryRec;
-    
+
     if(discoveryRec)
         CFRelease(discoveryRec);
-    
+
     return NULL;
 }
 
@@ -399,11 +399,11 @@ void iSCSIDiscoveryRecAddPortal(iSCSIMutableDiscoveryRecRef discoveryRec,
     // Validate inputs
     if(!discoveryRec || !targetIQN || !portalGroupTag || !portal)
         return;
-    
+
     CFMutableDictionaryRef targetDict;
     bool targetDictCreated = false;
     bool portalsArrayCreated = false;
-    
+
     // If target doesn't exist add it
     if(!CFDictionaryGetValueIfPresent(discoveryRec,targetIQN,(void *)&targetDict))
     {
@@ -412,29 +412,29 @@ void iSCSIDiscoveryRecAddPortal(iSCSIMutableDiscoveryRecRef discoveryRec,
                                                &kCFTypeDictionaryValueCallBacks);
         targetDictCreated = true;
     }
-    
+
     // If the group tag doesn't exist add it
     CFMutableArrayRef portalsArray;
-    
+
     if(!CFDictionaryGetValueIfPresent(targetDict,portalGroupTag,(void *)&portalsArray))
     {
         portalsArray = CFArrayCreateMutable(kCFAllocatorDefault,0,
                                             &kCFTypeArrayCallBacks);
         portalsArrayCreated = true;
     }
-    
+
     CFDictionaryRef portalDict = iSCSIPortalCreateDictionary(portal);
-    
+
     // Add a new portal
     CFArrayAppendValue(portalsArray,portalDict);
     CFDictionarySetValue(targetDict,portalGroupTag,portalsArray);
     CFDictionarySetValue(discoveryRec,targetIQN,targetDict);
-    
+
     CFRelease(portalDict);
-    
+
     if(targetDictCreated)
         CFRelease(targetDict);
-    
+
     if(portalsArrayCreated)
         CFRelease(portalsArray);
 }
@@ -461,7 +461,7 @@ void iSCSIDiscoveryRecAddTarget(iSCSIMutableDiscoveryRecRef discoveryRec,
                                                &kCFTypeDictionaryValueCallBacks);
         targetDictCreated = true;
     }
-    
+
 
     // Add target to discovery record
     CFDictionarySetValue(discoveryRec,targetIQN,targetDict);
@@ -479,12 +479,12 @@ CFArrayRef iSCSIDiscoveryRecCreateArrayOfTargets(iSCSIDiscoveryRecRef discoveryR
     // Validate input
     if(!discoveryRec)
         return NULL;
-    
+
     // Get all keys, which correspond to the targets
     const CFIndex count = CFDictionaryGetCount(discoveryRec);
     const void * keys[count];
     CFDictionaryGetKeysAndValues(discoveryRec,keys,NULL);
-    
+
     CFArrayRef targets = CFArrayCreate(kCFAllocatorDefault,
                                        keys,
                                        count,
@@ -503,18 +503,18 @@ CFArrayRef iSCSIDiscoveryRecCreateArrayOfPortalGroupTags(iSCSIDiscoveryRecRef di
     // Validate inputs
     if(!discoveryRec || !targetIQN)
         return NULL;
-    
+
     // If target doesn't exist return NULL
     CFMutableDictionaryRef targetDict;
     if(!CFDictionaryGetValueIfPresent(discoveryRec,targetIQN,(void *)&targetDict))
         return NULL;
-    
+
     // Otherwise get all keys, which correspond to the portal group tags
     const CFIndex count = CFDictionaryGetCount(targetDict);
-    
+
     const void * keys[count];
     CFDictionaryGetKeysAndValues(targetDict,keys,NULL);
-    
+
     CFArrayRef portalGroups = CFArrayCreate(kCFAllocatorDefault,
                                             keys,
                                             count,
@@ -536,7 +536,7 @@ CFArrayRef iSCSIDiscoveryRecGetPortals(iSCSIDiscoveryRecRef discoveryRec,
     // Validate inputs
     if(!discoveryRec || !targetIQN || !portalGroupTag)
         return NULL;
-    
+
     // If target doesn't exist return NULL
     CFMutableDictionaryRef targetDict;
     if(!CFDictionaryGetValueIfPresent(discoveryRec,targetIQN,(void *)&targetDict))
@@ -545,7 +545,7 @@ CFArrayRef iSCSIDiscoveryRecGetPortals(iSCSIDiscoveryRecRef discoveryRec,
     // Grab requested portal group
     CFArrayRef portalGroup = NULL;
     CFDictionaryGetValueIfPresent(targetDict,portalGroupTag,(void *)&portalGroup);
-    
+
     return portalGroup;
 }
 
@@ -708,9 +708,9 @@ CFDataRef iSCSISessionConfigCreateData(iSCSISessionConfigRef config)
 iSCSISessionConfigRef iSCSISessionConfigCreateWithData(CFDataRef data)
 {
     CFPropertyListFormat format;
-    
+
     iSCSISessionConfigRef sessCfg = CFPropertyListCreateWithData(kCFAllocatorDefault,data,0,&format,NULL);
-    
+
     if(format == kCFPropertyListBinaryFormat_v1_0)
         return sessCfg;
 
@@ -728,7 +728,7 @@ iSCSIMutableConnectionConfigRef iSCSIConnectionConfigCreateMutable()
     iSCSIMutableConnectionConfigRef portal = CFDictionaryCreateMutable(kCFAllocatorDefault,3,&kCFTypeDictionaryKeyCallBacks,&kCFTypeDictionaryValueCallBacks);
     CFDictionaryAddValue(portal,kiSCSIConnectionConfigHeaderDigestKey,kCFBooleanFalse);
     CFDictionaryAddValue(portal,kiSCSIConnectionConfigDataDigestKey,kCFBooleanFalse);
-    
+
     return portal;
 }
 
@@ -831,12 +831,12 @@ CFDataRef iSCSIConnectionConfigCreateData(iSCSIConnectionConfigRef config)
 iSCSIConnectionConfigRef iSCSIConnectionConfigCreateWithData(CFDataRef data)
 {
     CFPropertyListFormat format;
-    
+
     iSCSIConnectionConfigRef connCfg = CFPropertyListCreateWithData(kCFAllocatorDefault,data,0,&format,NULL);
-    
+
     if(format == kCFPropertyListBinaryFormat_v1_0)
         return connCfg;
-    
+
     CFRelease(connCfg);
     return NULL;
 }

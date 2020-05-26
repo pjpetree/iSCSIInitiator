@@ -38,12 +38,12 @@ typedef struct __iSCSISessionManager * iSCSISessionManagerRef;
 
 /*! Callback function called when a session or connection timeout occurs. */
 typedef void (*iSCSISessionTimeoutCallback)(iSCSITargetRef target,iSCSIPortalRef portal);
-    
+
 /*! Callback types used by the session manager. */
 typedef struct iSCSISessionManagerCallBacks
 {
     iSCSISessionTimeoutCallback timeoutCallback;
-    
+
 } iSCSISessionManagerCallBacks;
 
 /*! Call to initialize iSCSI session management functions.  This function will

@@ -1,9 +1,9 @@
 /*!
- * @author		Nareg Sinenian (implementation in crc32c.c by Mark Adler)
- * @file		crc32c.h
- * @date		December 10, 2014
- * @version		1.0
- * @copyright	(c) 2014 Nareg Sinenian. All rights reserved.
+ * @author      Nareg Sinenian (implementation in crc32c.c by Mark Adler)
+ * @file        crc32c.h
+ * @date        December 10, 2014
+ * @version     1.0
+ * @copyright   (c) 2014 Nareg Sinenian. All rights reserved.
  *
  * Header for Mark Adler's CRC32C computation (crc32c.c)
  */

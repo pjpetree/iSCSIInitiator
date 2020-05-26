@@ -59,79 +59,79 @@ static const UInt32 kiSCSIMaxConnectionsPerSession = 2;
 
 /*! An enumeration of configurable session parameters. */
 enum iSCSIHBASessionParameters {
-    
+
     /*! Time to retain (UInt16). */
     kiSCSIHBASODefaultTime2Retain,
-    
+
     /*! Time to wait (UInt16). */
     kiSCSIHBASODefaultTime2Wait,
-    
+
     /*! Error recovery level (UInt8). */
     kiSCSIHBASOErrorRecoveryLevel,
-    
+
     /*! Max connections supported by target (UInt32). */
     kiSCSIHBASOMaxConnections,
-    
+
     /*! Send data immediately (bool). */
     kiSCSIHBASOImmediateData,
-    
+
     /*!  Expect an initial R2T from target (bool). */
     kiSCSIHBASOInitialR2T,
-    
+
     /*! Data PDUs in order (bool). */
     kiSCSIHBASODataPDUInOrder,
-    
+
     /*! Data sequence in order (bool). */
     kiSCSIHBASODataSequenceInOrder,
-    
+
     /*! Number of outstanding R2Ts allowed (UInt16). */
     kiSCSIHBASOMaxOutstandingR2T,
-    
+
     /*! Maximum data burst length in bytes (UInt32). */
     kiSCSIHBASOMaxBurstLength,
-    
+
     /*! First data burst length in bytes (UInt32). */
     kiSCSIHBASOFirstBurstLength,
-    
+
     /*! Target session identifying handle (TSIH). */
     kiSCSIHBASOTargetSessionId,
-    
+
     /*! Target portal group tag (TPGT). */
     kiSCSIHBASOTargetPortalGroupTag,
-    
+
 };
 
 
 /*! An enumeration of configurable connection parameters. */
 enum iSCSIHBAConnectionParameters {
-    
+
     /*! Flag that indicates if this connection uses header digests (bool). */
     kiSCSIHBACOUseHeaderDigest,
-    
+
     /*! Flag that indicates if this connection uses data digests (bool). */
     kiSCSIHBACOUseDataDigest,
-    
+
     /*! Flag that indicates if this connection uses IF markers (bool). */
     kiSCSIHBACOUseIFMarker,
-    
+
     /*! Flag that indicates if this connection uses OF markers (bool). */
     kiSCSIHBACOUseOFMarker,
-    
+
     /*! Interval for OF marker (UInt16). */
     kiSCSIHBACOOFMarkInt,
-    
+
     /*! Interval for IF marker (UInt16). */
     kiSCSIHBACOIFMarkInt,
-    
+
     /*! Maximum data segment length allowed by the target (UInt32). */
     kiSCSIHBACOMaxSendDataSegmentLength,
-    
+
     /*! Maximum data segment length initiator can receive (UInt32). */
     kiSCSIHBACOMaxRecvDataSegmentLength,
-    
+
     /*! Initial expStatSN. */
     kiSCSIHBACOInitialExpStatSN
-    
+
 };
 
 

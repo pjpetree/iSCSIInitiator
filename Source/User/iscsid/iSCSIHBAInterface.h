@@ -48,22 +48,22 @@ typedef struct __iSCSIHBAInterface * iSCSIHBAInterfaceRef;
  *  instance. This struct is used to pass user-defined data
  *  when the iSCSIHBANotification callback functions are called. */
 typedef struct __iSCSIHBANotificationContext {
-    
+
     /*! Version of this struct (set to 0). */
     CFIndex version;
-    
+
     /*! User-defined data. */
     void * info;
-    
+
     /*! Retain callback function (may be NULL). */
     CFAllocatorRetainCallBack retain;
-    
+
     /*! Release callback function (may be NULL). */
     CFAllocatorReleaseCallBack release;
-    
+
     /*! Copy description callback function (may be NULL). */
     CFAllocatorCopyDescriptionCallBack copyDescription;
-    
+
 }  iSCSIHBANotificationContext;
 
 

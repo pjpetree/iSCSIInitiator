@@ -44,12 +44,12 @@ struct __iSCSISessionManager
     iSCSISessionManagerCallBacks callbacks;
     CFStringRef initiatorName;
     CFStringRef initiatorAlias;
-    
+
 };
 
 /*! This function is called handle session or connection network timeouts.
  *  When a timeout occurs the kernel deactivates the session and connection.
- *  The session layer (this layer) must release the connection after propogating 
+ *  The session layer (this layer) must release the connection after propogating
  *  the notification onto the user of the session manager. */
  void iSCSIHBANotificationTimeoutMessageHandler(iSCSISessionManagerRef managerRef,
                                                 iSCSIHBANotificationMessage * msg)
@@ -59,40 +59,40 @@ struct __iSCSISessionManager
      // so that clients of this layer can act
      iSCSITargetRef target = iSCSISessionCopyTargetForId(managerRef,msg->sessionId);
      iSCSIPortalRef portal = iSCSISessionCopyPortalForConnectionId(managerRef,msg->sessionId,msg->connectionId);
-     
+
      // Release the stale session/connection
      iSCSIHBAInterfaceReleaseConnection(managerRef->hbaInterface,msg->sessionId,msg->connectionId);
-     
+
      // Call user-defined callback function if one exists
      if(managerRef->callbacks.timeoutCallback)
          managerRef->callbacks.timeoutCallback(target,portal);
-     
+
      iSCSITargetRelease(target);
      iSCSIPortalRelease(portal);
  }
- 
-/*! Called to handle asynchronous events that involve dropped sessions, connections, 
- *  logout requests and parameter negotiation. This function is not called for asynchronous 
+
+/*! Called to handle asynchronous events that involve dropped sessions, connections,
+ *  logout requests and parameter negotiation. This function is not called for asynchronous
  *  SCSI messages or vendor-specific messages. */
 void iSCSIHBANotificationAsyncMessageHandler(iSCSISessionManagerRef managerRef,
                                              iSCSIHBANotificationAsyncMessage * msg)
 {
     enum iSCSIPDUAsyncMsgEvent asyncEvent = (enum iSCSIPDUAsyncMsgEvent)msg->asyncEvent;
     enum iSCSILogoutStatusCode statusCode;
-    
+
     switch (asyncEvent) {
-            
+
         // We are required to issue a logout request
         case kiSCSIPDUAsyncMsgLogout:
             iSCSISessionRemoveConnection(managerRef,msg->sessionId,msg->connectionId,&statusCode);
             break;
-            
+
         // We have been asked to re-negotiate parameters for this connection
         // (this is currently unsupported and we logout)
         case kiSCSIPDUAsyncMsgNegotiateParams:
             iSCSISessionRemoveConnection(managerRef,msg->sessionId,msg->connectionId,&statusCode);
             break;
-            
+
         default:
             break;
     }
@@ -103,7 +103,7 @@ static void iSCSIHBANotificationHandler(iSCSIHBAInterfaceRef interface,
                                         iSCSIHBANotificationMessage * msg,void * info)
 {
     iSCSISessionManagerRef managerRef = (iSCSISessionManagerRef)info;
-    
+
     // Process an asynchronous message
     switch(type)
     {
@@ -128,16 +128,16 @@ iSCSISessionManagerRef iSCSISessionManagerCreate(CFAllocatorRef allocator,
                                                  iSCSISessionManagerCallBacks callbacks)
 {
     iSCSISessionManagerRef managerRef = CFAllocatorAllocate(allocator,sizeof(struct __iSCSISessionManager),0);
-    
+
     iSCSIHBANotificationContext notifyContext;
     notifyContext.version = 0;
     notifyContext.info = managerRef;
     notifyContext.release = 0;
     notifyContext.retain = 0;
     notifyContext.copyDescription = 0;
-    
+
     iSCSIHBAInterfaceRef interface = iSCSIHBAInterfaceCreate(allocator,iSCSIHBANotificationHandler,&notifyContext);
-    
+
     if(interface) {
         managerRef->allocator = allocator;
         managerRef->hbaInterface = interface;
@@ -149,7 +149,7 @@ iSCSISessionManagerRef iSCSISessionManagerCreate(CFAllocatorRef allocator,
         CFAllocatorDeallocate(allocator,managerRef);
         managerRef = NULL;
     }
-    
+
     return managerRef;
 }
 

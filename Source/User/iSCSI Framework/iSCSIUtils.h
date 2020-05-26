@@ -57,7 +57,7 @@ Boolean iSCSIUtilsValidatePort(CFStringRef port);
  *  either one or two elements (one if the portal is absent, two if it was
  *  specified).
  *  @param portal a string of the form <host>:<port>
- *  @return an array containing one or both portal parts, or NULL if the 
+ *  @return an array containing one or both portal parts, or NULL if the
  *  specified portal was malformed. */
 CFArrayRef iSCSIUtilsCreateArrayByParsingPortalParts(CFStringRef portal);
 

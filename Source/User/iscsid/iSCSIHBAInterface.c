@@ -34,31 +34,31 @@
 #include <IOKit/IOReturn.h>
 
 struct __iSCSIHBAInterface {
-    
+
     /*! Allocator used to create this instance. */
     CFAllocatorRef allocator;
-    
+
     /*! The iSCSI HBA service. */
     io_service_t service;
-    
+
     /*! Connection to kernel user client. */
     io_connect_t connect;
-    
+
     /*! Runloop source associated with this instance. */
     CFRunLoopSourceRef source;
-    
+
     /*! Mach port used to receive notifications. */
     CFMachPortRef  notificationPort;
-    
+
     /*! Callback that will handle kernel notifications. */
     iSCSIHBANotificationCallBack callback;
-    
+
     /*! Notification data used when invoking the callback. */
     struct __iSCSIHBANotificationContext notifyContext;
 };
 
 /*! Handles messages sent from the HBA. This is an internal handler that is called first
- *  to adhere to the required Mach callback prototype. The info parameter contains 
+ *  to adhere to the required Mach callback prototype. The info parameter contains
  *  information about an iSCSIHBAInterface instance (which includes user-defined data). */
 static void iSCSIHBANotificationHandler(CFMachPortRef port,void * msg,CFIndex size,void * info)
 {
@@ -69,10 +69,10 @@ static void iSCSIHBANotificationHandler(CFMachPortRef port,void * msg,CFIndex si
 
     // Process notification type and return if invalid
     enum iSCSIHBANotificationTypes type = (enum iSCSIHBANotificationTypes)notificationMsg->notificationType;
-    
+
     if(type == kiSCSIHBANotificationInvalid)
         return;
-    
+
     // Call the callback function with the message type and body
     iSCSIHBAInterfaceRef interface = (iSCSIHBAInterfaceRef)info;
     if(interface->callback)
@@ -119,15 +119,15 @@ iSCSIHBAInterfaceRef iSCSIHBAInterfaceCreate(CFAllocatorRef allocator,iSCSIHBANo
     io_connect_t connect = IO_OBJECT_NULL;
     kern_return_t result = kIOReturnSuccess;
     CFMachPortRef notificationPort = NULL;
-    
+
     iSCSIHBAInterfaceRef interface = CFAllocatorAllocate(allocator,sizeof(struct __iSCSIHBAInterface),0);
-    
+
 	// Create a dictionary to match iSCSIkext
 	CFMutableDictionaryRef matchingDict = NULL;
 	matchingDict = IOServiceMatching(kiSCSIVirtualHBA_IOClassName);
-    
+
     service = IOServiceGetMatchingService(kIOMasterPortDefault,matchingDict);
-    
+
 	// Check to see if the driver was found in the I/O registry
     // and open a connection to it.
     if(service != IO_OBJECT_NULL) {
@@ -136,21 +136,21 @@ iSCSIHBAInterfaceRef iSCSIHBAInterfaceCreate(CFAllocatorRef allocator,iSCSIHBANo
 
 	if(result == kIOReturnSuccess)
         result = IOConnectCallScalarMethod(connect,kiSCSIOpenInitiator,0,0,0,0);
-    
+
     if(result == kIOReturnSuccess) {
-        
+
         CFMachPortContext notificationContext;
         notificationContext.version = 0;
         notificationContext.info = (void *)interface;
         notificationContext.release = 0;
         notificationContext.retain  = 0;
         notificationContext.copyDescription = NULL;
-        
+
         // Create a mach port to receive notifications from the kernel
         notificationPort = CFMachPortCreate(allocator,iSCSIHBANotificationHandler,&notificationContext,NULL);
         result = IOConnectSetNotificationPort(connect,0,CFMachPortGetPort(notificationPort),0);
     }
-    
+
     if(result == kIOReturnSuccess) {
         interface->allocator = allocator;
         interface->service = service;
@@ -159,7 +159,7 @@ iSCSIHBAInterfaceRef iSCSIHBAInterfaceCreate(CFAllocatorRef allocator,iSCSIHBANo
         interface->callback = callback;
         interface->source = NULL;
         memcpy(&interface->notifyContext,context,sizeof(struct __iSCSIHBANotificationContext));
-        
+
         // Retain user-defined data if a callback was provided
         // (this may be NULL in which case we are not responsible)
         if(interface->notifyContext.retain)
@@ -173,7 +173,7 @@ iSCSIHBAInterfaceRef iSCSIHBAInterfaceCreate(CFAllocatorRef allocator,iSCSIHBANo
             IOObjectRelease(connect);
         if(service != IO_OBJECT_NULL)
             IOObjectRelease(service);
-        
+
         CFAllocatorDeallocate(allocator,interface);
         interface = NULL;
     }
@@ -185,27 +185,27 @@ void iSCSIHBAInterfaceRelease(iSCSIHBAInterfaceRef interface)
 {
     if(!interface)
         return;
-    
+
     // Release runloop source is one exists
     if(interface->source)
         CFRelease(interface->source);
-    
+
     // Close connection to the driver
     IOConnectCallScalarMethod(interface->connect,kiSCSICloseInitiator,0,0,0,0);
-    
+
 	// Clean up (now that we have a connection we no longer need the object)
     IOServiceClose(interface->connect);
-    
+
     // Stop receiving HBA notifications
     if(interface->notificationPort) {
         CFRelease(interface->notificationPort);
     }
-    
+
     // Release user-defined data if a callback was provided
     // (this may be NULL in which case we are not responsible)
     if(interface->notifyContext.release)
         interface->notifyContext.release(interface->notifyContext.info);
-    
+
     CFAllocatorDeallocate(interface->allocator,interface);
 }
 
@@ -237,12 +237,12 @@ IOReturn iSCSIHBAInterfaceCreateSession(iSCSIHBAInterfaceRef interface,
     if(!interface || !portalAddress || !portalPort || !hostInterface || !remoteAddress ||
        !localAddress || !sessionId || !connectionId)
         return kIOReturnBadArgument;
-    
+
     // Pack the input parameters into a single buffer to send to the kernel
     const int kNumParams = 6;
     void * params[kNumParams];
     size_t paramSize[kNumParams];
-    
+
     // Add one for string lengths to copy the NULL character (CFGetStringLength
     // does not include the length of the NULL terminator)
     paramSize[0] = CFStringGetLength(targetIQN) + 1;
@@ -251,7 +251,7 @@ IOReturn iSCSIHBAInterfaceCreateSession(iSCSIHBAInterfaceRef interface,
     paramSize[3] = CFStringGetLength(hostInterface) + 1;
     paramSize[4] = sizeof(struct sockaddr_storage);
     paramSize[5] = sizeof(struct sockaddr_storage);
-    
+
     // Populate parameters
     params[0] = malloc(paramSize[0]);
     params[1] = malloc(paramSize[1]);
@@ -259,24 +259,24 @@ IOReturn iSCSIHBAInterfaceCreateSession(iSCSIHBAInterfaceRef interface,
     params[3] = malloc(paramSize[3]);
     params[4] = (void*)remoteAddress;
     params[5] = (void*)localAddress;
-    
+
     CFStringGetCString(targetIQN,params[0],paramSize[0],kCFStringEncodingASCII);
     CFStringGetCString(portalAddress,params[1],paramSize[1],kCFStringEncodingASCII);
     CFStringGetCString(portalPort,params[2],paramSize[2],kCFStringEncodingASCII);
     CFStringGetCString(hostInterface,params[3],paramSize[3],kCFStringEncodingASCII);
-    
+
     // The input buffer will first have eight bytes to denote the length of
     // the portion that follows.  So for each of the six input parameters,
     // we'll have six UInt64 blocks that indicate the size up front.
     size_t header = kNumParams*sizeof(UInt64);
     size_t inputStructSize = header;
-    
+
     CFIndex paramIdx = 0;
     while(paramIdx < kNumParams) {
         inputStructSize += paramSize[paramIdx];
         paramIdx++;
     }
-    
+
     UInt8 * inputStruct = (UInt8*)malloc(inputStructSize);
     UInt8 * inputStructPos = inputStruct + header;
 
@@ -284,39 +284,39 @@ IOReturn iSCSIHBAInterfaceCreateSession(iSCSIHBAInterfaceRef interface,
     while(paramIdx < kNumParams) {
         memcpy(inputStructPos,params[paramIdx],paramSize[paramIdx]);
         inputStructPos += paramSize[paramIdx];
-        
+
         UInt64 * header = (UInt64*)(inputStruct + sizeof(UInt64)*paramIdx);
         *header = paramSize[paramIdx];
         paramIdx++;
     }
-    
+
     const UInt32 inputCnt = 1;
     UInt64 inputs[inputCnt];
     inputs[0] = kNumParams;
-    
+
     const UInt32 expOutputCnt = 3;
     UInt64 output[expOutputCnt];
     UInt32 outputCnt = expOutputCnt;
-    
+
     kern_return_t result =
         IOConnectCallMethod(interface->connect,kiSCSICreateSession,inputs,inputCnt,
                             inputStruct,inputStructSize,output,&outputCnt,0,0);
-    
+
     // Free allocated memory
     free(params[0]);
     free(params[1]);
     free(params[2]);
     free(params[3]);
     free(inputStruct);
-    
+
     if(result == kIOReturnSuccess && outputCnt == expOutputCnt) {
         *sessionId    = (UInt16)output[0];
         *connectionId = (UInt32)output[1];
-        
+
         IOReturn error = (IOReturn)output[2];
         return error;
     }
-    
+
     return result;
 }
 
@@ -335,7 +335,7 @@ IOReturn iSCSIHBAInterfaceReleaseSession(iSCSIHBAInterfaceRef interface,
     // Tell the kernel to drop this session and all of its related resources
     const UInt32 inputCnt = 1;
     UInt64 input = sessionId;
-    
+
     return IOConnectCallScalarMethod(interface->connect,kiSCSIReleaseSession,&input,inputCnt,0,0);
 }
 
@@ -355,13 +355,13 @@ IOReturn iSCSIHBAInterfaceSetSessionParameter(iSCSIHBAInterfaceRef interface,
     // Check parameters
     if(!interface || sessionId == kiSCSIInvalidSessionId || !paramVal || paramSize == 0)
         return kIOReturnBadArgument;
-    
+
     UInt64 paramValCopy = 0;
     memcpy(&paramValCopy,paramVal,paramSize);
-    
+
     const UInt32 inputCnt = 3;
     const UInt64 input[] = {sessionId,parameter,paramValCopy};
-    
+
     return IOConnectCallScalarMethod(interface->connect,kiSCSISetSessionParameter,input,inputCnt,0,0);
 }
 
@@ -381,19 +381,19 @@ IOReturn iSCSIHBAInterfaceGetSessionParameter(iSCSIHBAInterfaceRef interface,
     // Check parameters
     if(!interface || sessionId == kiSCSIInvalidSessionId || !paramVal || paramSize == 0)
         return kIOReturnBadArgument;
-    
+
     const UInt32 inputCnt = 2;
     const UInt64 input[] = {sessionId,parameter};
-    
+
     UInt32 outputCnt = 1;
     UInt64 output;
 
     kern_return_t error = IOConnectCallScalarMethod(interface->connect,kiSCSIGetSessionParameter,
                                                     input,inputCnt,&output,&outputCnt);
-    
+
     if(error == kIOReturnSuccess)
         memcpy(paramVal,&output,paramSize);
-    
+
     return error;
 }
 
@@ -420,13 +420,13 @@ IOReturn iSCSIHBAInterfaceCreateConnection(iSCSIHBAInterfaceRef interface,
     // Check parameters
     if(!interface || sessionId == kiSCSIInvalidSessionId || !portalAddress || !portalPort || !hostInterface || !remoteAddress || !connectionId)
         return kIOReturnBadArgument;
-    
+
     // Pack the input parameters into a single buffer to send to the kernel
     const int kNumParams = 5;
 
     void * params[kNumParams];
     size_t paramSize[kNumParams];
-    
+
     // Add one for string lengths to copy the NULL character (CFGetStringLength
     // does not include the length of the NULL terminator)
     paramSize[0] = CFStringGetLength(portalAddress) + 1;
@@ -434,63 +434,63 @@ IOReturn iSCSIHBAInterfaceCreateConnection(iSCSIHBAInterfaceRef interface,
     paramSize[2] = CFStringGetLength(hostInterface) + 1;
     paramSize[3] = sizeof(struct sockaddr_storage);
     paramSize[4] = sizeof(struct sockaddr_storage);
-    
+
     params[0] = malloc(paramSize[0]);
     params[1] = malloc(paramSize[1]);
     params[2] = malloc(paramSize[2]);
     params[3] = (void*)remoteAddress;
     params[4] = (void*)localAddress;
-    
+
     CFStringGetCString(portalAddress,params[0],paramSize[0],kCFStringEncodingASCII);
     CFStringGetCString(portalPort,params[1],paramSize[1],kCFStringEncodingASCII);
     CFStringGetCString(hostInterface,params[2],paramSize[2],kCFStringEncodingASCII);
-    
+
     // The input buffer will first have eight bytes to denote the length of
     // the portion that follows.  So for each of the six input parameters,
     // we'll have six UInt64 blocks that indicate the size up front.
     size_t header = kNumParams*sizeof(UInt64);
     size_t inputStructSize = header;
-    
+
     CFIndex paramIdx = 0;
     while(paramIdx < kNumParams) {
         inputStructSize += paramSize[paramIdx];
         paramIdx++;
     }
-    
+
     UInt8 * inputStruct = (UInt8*)malloc(inputStructSize);
     UInt8 * inputStructPos = inputStruct + header;
-    
+
     paramIdx = 0;
     while(paramIdx < kNumParams) {
         memcpy(inputStructPos,params[paramIdx],paramSize[paramIdx]);
         inputStructPos += paramSize[paramIdx];
-        
+
         UInt64 * header = (UInt64*)(inputStruct + sizeof(UInt64)*paramIdx);
         *header = paramSize[paramIdx];
         paramIdx++;
     }
-    
+
     // Tell the kernel to drop this session and all of its related resources
     const UInt32 inputCnt = 2;
     const UInt64 inputs[] = {sessionId,kNumParams};
-    
+
     const UInt32 expOutputCnt = 2;
     UInt64 output[expOutputCnt];
     UInt32 outputCnt = expOutputCnt;
-    
+
     kern_return_t result =
         IOConnectCallMethod(interface->connect,kiSCSICreateConnection,inputs,inputCnt,inputStruct,
                             inputStructSize,output,&outputCnt,0,0);
-    
+
     // Free memory
     free(params[0]);
     free(params[1]);
     free(params[2]);
-    
+
     if(result == kIOReturnSuccess && outputCnt == expOutputCnt) {
         *connectionId = (UInt32)output[0];
         IOReturn error = (IOReturn)output[1];
-        
+
         return error;
     }
 
@@ -512,7 +512,7 @@ IOReturn iSCSIHBAInterfaceReleaseConnection(iSCSIHBAInterfaceRef interface,
     // Tell kernel to drop this connection
     const UInt32 inputCnt = 2;
     UInt64 inputs[] = {sessionId,connectionId};
-    
+
     return IOConnectCallScalarMethod(interface->connect,kiSCSIReleaseConnection,inputs,inputCnt,0,0);
 }
 
@@ -534,19 +534,19 @@ IOReturn iSCSIHBAInterfaceSend(iSCSIHBAInterfaceRef interface,
     // Check parameters
     if(!interface || sessionId == kiSCSIInvalidSessionId || connectionId == kiSCSIInvalidConnectionId || !bhs || (!data && length > 0))
         return kIOReturnBadArgument;
-    
+
     // Setup input scalar array
     const UInt32 inputCnt = 2;
     const UInt64 inputs[] = {sessionId, connectionId};
-    
+
     // Call kernel method to send (buffer) bhs and then data
     kern_return_t result;
     result = IOConnectCallStructMethod(interface->connect,kiSCSISendBHS,bhs,
                                        sizeof(iSCSIPDUInitiatorBHS),NULL,NULL);
-    
+
     if(result != kIOReturnSuccess)
         return result;
-    
+
     return IOConnectCallMethod(interface->connect,kiSCSISendData,inputs,inputCnt,
                                                data,length,NULL,NULL,NULL,NULL);
 }
@@ -569,11 +569,11 @@ IOReturn iSCSIHBAInterfaceReceive(iSCSIHBAInterfaceRef interface,
     // Check parameters
     if(!interface || sessionId == kiSCSIInvalidSessionId || connectionId == kiSCSIInvalidConnectionId || !bhs)
         return kIOReturnBadArgument;
-    
+
     // Setup input scalar array
     const UInt32 inputCnt = 2;
     UInt64 inputs[] = {sessionId,connectionId};
-    
+
     size_t bhsLength = sizeof(iSCSIPDUTargetBHS);
 
     // Call kernel method to determine how much data there is to receive
@@ -582,22 +582,22 @@ IOReturn iSCSIHBAInterfaceReceive(iSCSIHBAInterfaceRef interface,
     kern_return_t result;
     result = IOConnectCallMethod(interface->connect,kiSCSIRecvBHS,inputs,inputCnt,NULL,0,
                                  NULL,NULL,bhs,&bhsLength);
-    
+
     if(result != kIOReturnSuccess)
         return result;
-    
+
     // Determine how much data to allocate for the data buffer
     *length = iSCSIPDUGetDataSegmentLength((iSCSIPDUCommonBHS *)bhs);
-    
+
     // If no data, were done at this point
     if(*length == 0)
         return 0;
-    
+
     *data = iSCSIPDUDataCreate(*length);
-        
+
     if(*data == NULL)
         return kIOReturnIOError;
-    
+
     // Call kernel method to get data from a receive buffer
     result = IOConnectCallMethod(interface->connect,kiSCSIRecvData,inputs,inputCnt,NULL,0,
                                  NULL,NULL,*data,length);
@@ -605,7 +605,7 @@ IOReturn iSCSIHBAInterfaceReceive(iSCSIHBAInterfaceRef interface,
     // If we failed, free the temporary buffer and quit with error
     if(result != kIOReturnSuccess)
         iSCSIPDUDataRelease(data);
-    
+
     return result;
 }
 
@@ -627,13 +627,13 @@ IOReturn iSCSIHBAInterfaceSetConnectionParameter(iSCSIHBAInterfaceRef interface,
     // Check parameters
     if(!interface || sessionId == kiSCSIInvalidSessionId || connectionId == kiSCSIInvalidConnectionId || !paramVal || paramSize == 0)
         return kIOReturnBadArgument;
-    
+
     UInt64 paramValCopy = 0;
     memcpy(&paramValCopy,paramVal,paramSize);
-    
+
     const UInt32 inputCnt = 4;
     const UInt64 inputs[] = {sessionId,connectionId,parameter,paramValCopy};
-    
+
     return IOConnectCallScalarMethod(interface->connect,kiSCSISetConnectionParameter,inputs,inputCnt,0,0);
 }
 
@@ -655,19 +655,19 @@ IOReturn iSCSIHBAInterfaceGetConnectionParameter(iSCSIHBAInterfaceRef interface,
     // Check parameters
     if(!interface || sessionId == kiSCSIInvalidSessionId || connectionId  == kiSCSIInvalidConnectionId || !paramVal || paramSize == 0)
         return kIOReturnBadArgument;
-    
+
     const UInt32 inputCnt = 3;
     const UInt64 input[] = {sessionId,connectionId,parameter};
-    
+
     UInt32 outputCnt = 1;
     UInt64 output;
-    
+
     kern_return_t error = IOConnectCallScalarMethod(interface->connect,kiSCSIGetConnectionParameter,
                                                     input,inputCnt,&output,&outputCnt);
-    
+
     if(error == kIOReturnSuccess)
         memcpy(paramVal,&output,paramSize);
-        
+
     return error;
 }
 
@@ -683,11 +683,11 @@ IOReturn iSCSIHBAInterfaceActivateConnection(iSCSIHBAInterfaceRef interface,
     // Check parameters
     if(!interface || sessionId == kiSCSIInvalidSessionId || connectionId == kiSCSIInvalidConnectionId)
         return kIOReturnBadArgument;
-    
+
     // Tell kernel to drop this connection
     const UInt32 inputCnt = 2;
     UInt64 inputs[] = {sessionId,connectionId};
-    
+
     return IOConnectCallScalarMethod(interface->connect,kiSCSIActivateConnection,
                                                      inputs,inputCnt,NULL,NULL);
 }
@@ -702,10 +702,10 @@ IOReturn iSCSIHBAInterfaceActivateAllConnections(iSCSIHBAInterfaceRef interface,
     // Check parameters
     if(!interface || sessionId == kiSCSIInvalidSessionId)
         return kIOReturnBadArgument;
-    
+
     const UInt32 inputCnt = 1;
     UInt64 input = sessionId;
-    
+
     return IOConnectCallScalarMethod(interface->connect,kiSCSIActivateAllConnections,
                                                      &input,inputCnt,NULL,NULL);
 }
@@ -722,11 +722,11 @@ IOReturn iSCSIHBAInterfaceDeactivateConnection(iSCSIHBAInterfaceRef interface,
     // Check parameters
     if(!interface || sessionId == kiSCSIInvalidSessionId || connectionId == kiSCSIInvalidConnectionId)
         return kIOReturnBadArgument;
-    
+
     // Tell kernel to drop this connection
     const UInt32 inputCnt = 2;
     UInt64 inputs[] = {sessionId,connectionId};
-    
+
     return IOConnectCallScalarMethod(interface->connect,kiSCSIDeactivateConnection,
                                                      inputs,inputCnt,NULL,NULL);
 }
@@ -741,10 +741,10 @@ IOReturn iSCSIHBAInterfaceDeactivateAllConnections(iSCSIHBAInterfaceRef interfac
     // Check parameters
     if(!interface || sessionId == kiSCSIInvalidSessionId)
         return kIOReturnBadArgument;
-    
+
     const UInt32 inputCnt = 1;
     UInt64 input = sessionId;
-    
+
     return IOConnectCallScalarMethod(interface->connect,kiSCSIDeactivateAllConnections,
                                                      &input,inputCnt,NULL,NULL);
 }
@@ -762,18 +762,18 @@ IOReturn iSCSIHBAInterfaceGetConnection(iSCSIHBAInterfaceRef interface,
     // Check parameters
     if(!interface || sessionId == kiSCSIInvalidSessionId || !connectionId)
         return kIOReturnBadArgument;
-    
+
     const UInt32 inputCnt = 1;
     UInt64 input = sessionId;
-    
+
     const UInt32 expOutputCnt = 1;
     UInt64 output[expOutputCnt];
     UInt32 outputCnt = expOutputCnt;
-    
+
     kern_return_t result =
         IOConnectCallScalarMethod(interface->connect,kiSCSIGetConnection,&input,inputCnt,
                                   output,&outputCnt);
-    
+
     if(result == kIOReturnSuccess && outputCnt == expOutputCnt)
         *connectionId = (UInt32)output[0];
 
@@ -792,17 +792,17 @@ IOReturn iSCSIHBAInterfaceGetNumConnections(iSCSIHBAInterfaceRef interface,
     // Check parameters
     if(!interface || sessionId == kiSCSIInvalidSessionId || !numConnections)
         return kIOReturnBadArgument;
-    
+
     const UInt32 inputCnt = 1;
     UInt64 input = sessionId;
-    
+
     const UInt32 expOutputCnt = 1;
     UInt64 output[expOutputCnt];
     UInt32 outputCnt = expOutputCnt;
-    
+
     kern_return_t result = IOConnectCallScalarMethod(
         interface->connect,kiSCSIGetNumConnections,&input,inputCnt,output,&outputCnt);
-    
+
     if(result == kIOReturnSuccess && outputCnt == expOutputCnt)
         *numConnections = (UInt32)output[0];
 
@@ -818,11 +818,11 @@ SessionIdentifier iSCSIHBAInterfaceGetSessionIdForTargetIQN(iSCSIHBAInterfaceRef
 {
     if(!interface || !targetIQN)
         return kiSCSIInvalidSessionId;
-    
+
     const UInt32 expOutputCnt = 1;
     UInt64 output[expOutputCnt];
     UInt32 outputCnt = expOutputCnt;
-    
+
     const int targetIQNBufferSize = (int)CFStringGetLength(targetIQN)+1;
     char * targetIQNBuffer = (char *)malloc(targetIQNBufferSize);
     if(!CFStringGetCString(targetIQN,targetIQNBuffer,targetIQNBufferSize,kCFStringEncodingASCII))
@@ -837,12 +837,12 @@ SessionIdentifier iSCSIHBAInterfaceGetSessionIdForTargetIQN(iSCSIHBAInterfaceRef
         targetIQNBuffer,
         targetIQNBufferSize,
         output,&outputCnt,0,0);
-    
+
     free(targetIQNBuffer);
-    
+
     if(result == kIOReturnSuccess && outputCnt == expOutputCnt)
         return (SessionIdentifier)output[0];
-    
+
     return kiSCSIInvalidSessionId;
 }
 
@@ -858,14 +858,14 @@ ConnectionIdentifier iSCSIHBAInterfaceGetConnectionIdForPortalAddress(iSCSIHBAIn
 {
     if(!interface || sessionId == kiSCSIInvalidSessionId || !portalAddress)
         return kIOReturnBadArgument;
-    
+
     const UInt32 inputCnt = 1;
     UInt64 input = sessionId;
-    
+
     const UInt32 expOutputCnt = 1;
     UInt64 output[expOutputCnt];
     UInt32 outputCnt = expOutputCnt;
-    
+
     const int portalAddressBufferSize = (int)CFStringGetLength(portalAddress)+1;
     char * portalAddressBuffer = (char*)malloc(portalAddressBufferSize);
     if(!CFStringGetCString(portalAddress,portalAddressBuffer,portalAddressBufferSize,kCFStringEncodingASCII))
@@ -873,19 +873,19 @@ ConnectionIdentifier iSCSIHBAInterfaceGetConnectionIdForPortalAddress(iSCSIHBAIn
         free(portalAddressBuffer);
         return kIOReturnBadArgument;
     }
-    
+
     kern_return_t result =
         IOConnectCallMethod(interface->connect,kiSCSIGetConnectionIdForPortalAddress,
                             &input,inputCnt,
                             portalAddressBuffer,
                             portalAddressBufferSize,
                             output,&outputCnt,0,0);
-    
+
     free(portalAddressBuffer);
-    
+
     if(result != kIOReturnSuccess || outputCnt != expOutputCnt)
         return kiSCSIInvalidConnectionId;
-    
+
     return (ConnectionIdentifier)output[0];
 }
 
@@ -901,18 +901,18 @@ IOReturn iSCSIHBAInterfaceGetSessionIds(iSCSIHBAInterfaceRef interface,
 {
     if(!interface || !sessionIds || !sessionCount)
         return kIOReturnBadArgument;
-    
+
     const UInt32 expOutputCnt = 1;
     UInt64 output;
     UInt32 outputCnt = expOutputCnt;
-    
+
     *sessionCount = 0;
     size_t outputStructSize = sizeof(SessionIdentifier)*kiSCSIMaxSessions;
-    
+
     kern_return_t result =
         IOConnectCallMethod(interface->connect,kiSCSIGetSessionIds,0,0,0,0,
                             &output,&outputCnt,sessionIds,&outputStructSize);
-    
+
     if(result == kIOReturnSuccess && outputCnt == expOutputCnt)
         *sessionCount = (UInt16)output;
 
@@ -932,24 +932,24 @@ IOReturn iSCSIHBAInterfaceGetConnectionIds(iSCSIHBAInterfaceRef interface,
 {
     if(!interface || sessionId == kiSCSIInvalidSessionId || !connectionIds || !connectionCount)
         return kIOReturnBadArgument;
-    
+
     const UInt32 inputCnt = 1;
     UInt64 input = sessionId;
-    
+
     const UInt32 expOutputCnt = 1;
     UInt64 output;
     UInt32 outputCnt = expOutputCnt;
-    
+
     *connectionCount = 0;
     size_t outputStructSize = sizeof(ConnectionIdentifier)*kiSCSIMaxConnectionsPerSession;
 
     kern_return_t result =
         IOConnectCallMethod(interface->connect,kiSCSIGetConnectionIds,&input,inputCnt,0,0,
                             &output,&outputCnt,connectionIds,&outputStructSize);
-    
+
     if(result == kIOReturnSuccess && outputCnt == expOutputCnt)
         *connectionCount = (UInt32)output;
-    
+
     return result;
 }
 
@@ -964,23 +964,23 @@ CFStringRef iSCSIHBAInterfaceCreateTargetIQNForSessionId(iSCSIHBAInterfaceRef in
 {
     if(!interface || sessionId == kiSCSIInvalidSessionId)
         return NULL;
-    
+
     const UInt32 inputCnt = 1;
     UInt64 input = sessionId;
-    
+
     const char targetIQN[NI_MAXHOST];
     size_t targetIQNLength = NI_MAXHOST;
-    
+
     kern_return_t result = IOConnectCallMethod(interface->connect,kiSCSICreateTargetIQNForSessionId,
                                                &input,inputCnt,0,0,0,0,
                                                (void*)targetIQN,&targetIQNLength);
     if(result != kIOReturnSuccess)
         return NULL;
-    
+
     return CFStringCreateWithCString(kCFAllocatorDefault,targetIQN,kCFStringEncodingASCII);
 }
 
-/*! Creates a string containing the address of the portal associated with 
+/*! Creates a string containing the address of the portal associated with
  *  the specified connection.
  *  @param interface an instance of an iSCSIHBAInterface.
  *  @param sessionId session identifier.
@@ -993,19 +993,19 @@ CFStringRef iSCSIHBAInterfaceCreatePortalAddressForConnectionId(iSCSIHBAInterfac
 {
     if(!interface || sessionId == kiSCSIInvalidSessionId || connectionId == kiSCSIInvalidConnectionId)
         return NULL;
-    
+
     const UInt32 inputCnt = 2;
     UInt64 input[] = {sessionId,connectionId};
-    
+
     const char portalAddress[NI_MAXHOST];
     size_t portalAddressLength = NI_MAXHOST;
-    
+
     kern_return_t result = IOConnectCallMethod(interface->connect,kiSCSIGetPortalAddressForConnectionId,
                                                input,inputCnt,0,0,0,0,
                                                (void *)portalAddress,&portalAddressLength);
     if(result != kIOReturnSuccess)
         return NULL;
-    
+
     return CFStringCreateWithCString(kCFAllocatorDefault,portalAddress,kCFStringEncodingASCII);
 }
 
@@ -1022,19 +1022,19 @@ CFStringRef iSCSIHBAInterfaceCreatePortalPortForConnectionId(iSCSIHBAInterfaceRe
 {
     if(!interface || sessionId == kiSCSIInvalidSessionId || connectionId == kiSCSIInvalidConnectionId)
         return NULL;
-    
+
     const UInt32 inputCnt = 2;
     UInt64 input[] = {sessionId,connectionId};
 
     const char portalPort[NI_MAXSERV];
     size_t portalPortLength = NI_MAXSERV;
-    
+
     kern_return_t result = IOConnectCallMethod(interface->connect,kiSCSIGetPortalPortForConnectionId,
                                                input,inputCnt,0,0,0,0,
                                                (void *)portalPort,&portalPortLength);
     if(result != kIOReturnSuccess)
         return NULL;
-    
+
     return CFStringCreateWithCString(kCFAllocatorDefault,portalPort,kCFStringEncodingASCII);
 }
 
@@ -1042,7 +1042,7 @@ CFStringRef iSCSIHBAInterfaceCreatePortalPortForConnectionId(iSCSIHBAInterfaceRe
  *  @param interface an instance of an iSCSIHBAInterface.
  *  @param sessionId session identifier.
  *  @param connectionId connection identifier.
- *  @return a string containing the host interface name, or NULL if the 
+ *  @return a string containing the host interface name, or NULL if the
  *  session or connection was invalid. */
 CFStringRef iSCSIHBAInterfaceCreateHostInterfaceForConnectionId(iSCSIHBAInterfaceRef interface,
                                                                 SessionIdentifier sessionId,
@@ -1050,11 +1050,11 @@ CFStringRef iSCSIHBAInterfaceCreateHostInterfaceForConnectionId(iSCSIHBAInterfac
 {
     if(!interface || sessionId == kiSCSIInvalidSessionId || connectionId == kiSCSIInvalidConnectionId)
         return NULL;
-    
+
     const UInt32 inputCnt = 2;
     UInt64 input[] = {sessionId,connectionId};
-    
-    
+
+
     const char hostInterface[NI_MAXHOST];
     size_t hostInterfaceLength = NI_MAXHOST;
 
@@ -1063,6 +1063,6 @@ CFStringRef iSCSIHBAInterfaceCreateHostInterfaceForConnectionId(iSCSIHBAInterfac
                                                (void *)hostInterface,&hostInterfaceLength);
     if(result != kIOReturnSuccess)
         return NULL;
-    
+
     return CFStringCreateWithCString(kCFAllocatorDefault,hostInterface,kCFStringEncodingASCII);
 }

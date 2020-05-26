@@ -58,7 +58,7 @@ errno_t iSCSIDiscoveryAddTargetForSendTargets(iSCSIPreferencesRef preferences,
                 iSCSIPreferencesAddDynamicTargetForSendTargets(preferences,targetIQN,portal,discoveryPortal);
         }
     }
-    
+
     CFRelease(portalGroups);
 
     return 0;
@@ -76,10 +76,10 @@ errno_t iSCSIDiscoveryUpdatePreferencesWithDiscoveredTargets(iSCSISessionManager
                                                              iSCSIDiscoveryRecRef discoveryRec)
 {
     CFArrayRef targets = iSCSIDiscoveryRecCreateArrayOfTargets(discoveryRec);
-    
+
     if(!targets)
         return EINVAL;
-    
+
     CFIndex targetCount = CFArrayGetCount(targets);
 
     CFMutableDictionaryRef discTargets = CFDictionaryCreateMutable(
@@ -104,7 +104,7 @@ errno_t iSCSIDiscoveryUpdatePreferencesWithDiscoveredTargets(iSCSISessionManager
             CFStringGetCString(statusString,statusStringBuffer,statusStringLength,kCFStringEncodingASCII);
 
             asl_log(NULL, NULL, ASL_LEVEL_INFO, "%s", statusStringBuffer);
-            
+
             CFRelease(statusString);
         }
         // Target doesn't exist, or target exists with SendTargets
@@ -119,9 +119,9 @@ errno_t iSCSIDiscoveryUpdatePreferencesWithDiscoveredTargets(iSCSISessionManager
             CFIndex statusStringLength = CFStringGetMaximumSizeForEncoding(CFStringGetLength(statusString),kCFStringEncodingASCII) + sizeof('\0');
             char statusStringBuffer[statusStringLength];
             CFStringGetCString(statusString,statusStringBuffer,statusStringLength,kCFStringEncodingASCII);
-            
+
             asl_log(NULL, NULL, ASL_LEVEL_INFO, "%s", statusStringBuffer);
-            
+
             CFRelease(statusString);
         }
 
@@ -157,7 +157,7 @@ errno_t iSCSIDiscoveryUpdatePreferencesWithDiscoveredTargets(iSCSISessionManager
     CFRelease(targets);
     CFRelease(discTargets);
     CFRelease(existingTargets);
-    
+
     return 0;
 }
 
@@ -174,13 +174,13 @@ CFDictionaryRef iSCSIDiscoveryCreateRecordsWithSendTargets(iSCSISessionManagerRe
 {
     if(!preferences)
         return NULL;
-    
+
     CFArrayRef portals = iSCSIPreferencesCreateArrayOfPortalsForSendTargetsDiscovery(preferences);
-    
+
     // Quit if no discovery portals are defined
     if(!portals)
         return NULL;
-    
+
     CFIndex portalCount = CFArrayGetCount(portals);
 
     CFStringRef discoveryPortal = NULL;
@@ -193,15 +193,15 @@ CFDictionaryRef iSCSIDiscoveryCreateRecordsWithSendTargets(iSCSISessionManagerRe
     for(CFIndex idx = 0; idx < portalCount; idx++)
     {
         discoveryPortal = CFArrayGetValueAtIndex(portals,idx);
-        
+
         if(!discoveryPortal)
             continue;
-        
+
         portal = iSCSIPreferencesCopySendTargetsDiscoveryPortal(preferences,discoveryPortal);
-        
+
         if(!portal)
             continue;
-        
+
         enum iSCSILoginStatusCode statusCode;
         iSCSIMutableDiscoveryRecRef discoveryRec;
 
@@ -218,9 +218,9 @@ CFDictionaryRef iSCSIDiscoveryCreateRecordsWithSendTargets(iSCSISessionManagerRe
             CFIndex errorStringLength = CFStringGetMaximumSizeForEncoding(CFStringGetLength(errorString),kCFStringEncodingASCII) + sizeof('\0');
             char errorStringBuffer[errorStringLength];
             CFStringGetCString(errorString,errorStringBuffer,errorStringLength,kCFStringEncodingASCII);
-            
+
             asl_log(NULL, NULL, ASL_LEVEL_ERR, "%s", errorStringBuffer);
-            
+
             CFRelease(errorString);
         }
         else if(statusCode != kiSCSILoginSuccess) {
@@ -228,13 +228,13 @@ CFDictionaryRef iSCSIDiscoveryCreateRecordsWithSendTargets(iSCSISessionManagerRe
                 kCFAllocatorDefault,0,
                 CFSTR("login failed with (code %d) during SendTargets discovery of %@."),
                 statusCode,discoveryPortal);
-            
+
             CFIndex errorStringLength = CFStringGetMaximumSizeForEncoding(CFStringGetLength(errorString),kCFStringEncodingASCII) + sizeof('\0');
             char errorStringBuffer[errorStringLength];
             CFStringGetCString(errorString,errorStringBuffer,errorStringLength,kCFStringEncodingASCII);
 
             asl_log(NULL, NULL, ASL_LEVEL_ERR, "%s", errorStringBuffer);
-            
+
             CFRelease(errorString);
         }
         else {
@@ -244,13 +244,13 @@ CFDictionaryRef iSCSIDiscoveryCreateRecordsWithSendTargets(iSCSISessionManagerRe
                 iSCSIDiscoveryRecRelease(discoveryRec);
             }
         }
-        
+
         iSCSIAuthRelease(auth);
         iSCSIPortalRelease(portal);
     }
-    
+
     // Release the array of discovery portals
     CFRelease(portals);
-    
+
     return discoveryRecords;
 }

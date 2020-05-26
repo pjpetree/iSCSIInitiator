@@ -47,9 +47,9 @@ io_object_t iSCSIIORegistryGetiSCSIHBAEntry()
     // Create a dictionary to match iSCSIkext
     CFMutableDictionaryRef matchingDict = NULL;
     matchingDict = IOServiceMatching(kiSCSIVirtualHBA_IOClassName);
-    
+
     io_service_t service = IOServiceGetMatchingService(kIOMasterPortDefault,matchingDict);
-    
+
     return service;
 }
 
@@ -61,21 +61,21 @@ io_object_t iSCSIIORegistryGetTargetEntry(CFStringRef targetIQN)
 {
     if(!targetIQN)
         return IO_OBJECT_NULL;
-    
+
     io_service_t service;
     if(!(service = iSCSIIORegistryGetiSCSIHBAEntry()))
         return IO_OBJECT_NULL;
-    
+
     // Iterate over the targets and find the specified target by name
     io_iterator_t iterator = IO_OBJECT_NULL;
     IORegistryEntryGetChildIterator(service,kIOServicePlane,&iterator);
-    
+
     io_object_t entry;
     while((entry = IOIteratorNext(iterator)) != IO_OBJECT_NULL)
     {
         CFDictionaryRef protocolDict = IORegistryEntryCreateCFProperty(
             entry,CFSTR(kIOPropertyProtocolCharacteristicsKey),kCFAllocatorDefault,0);
-        
+
         if(protocolDict)
         {
             CFStringRef IQN = CFDictionaryGetValue(protocolDict,CFSTR(kIOPropertyiSCSIQualifiedNameKey));
@@ -89,7 +89,7 @@ io_object_t iSCSIIORegistryGetTargetEntry(CFStringRef targetIQN)
         }
         IOObjectRelease(entry);
     }
-    
+
     IOObjectRelease(iterator);
     return IO_OBJECT_NULL;
 }
@@ -104,15 +104,15 @@ kern_return_t iSCSIIORegistryGetTargets(io_iterator_t * iterator)
 {
     if(!iterator)
         return kIOReturnBadArgument;
-    
+
     io_object_t service = iSCSIIORegistryGetiSCSIHBAEntry();
-    
+
     if(service == IO_OBJECT_NULL)
         return kIOReturnNotFound;
 
     // The children of the iSCSI HBA are the targets (IOSCSIParallelInterfaceDevice)
     IORegistryEntryGetChildIterator(service,kIOServicePlane,iterator);
-    
+
     return kIOReturnSuccess;
 }
 
@@ -125,12 +125,12 @@ kern_return_t iSCSIIORegistryGetLUNs(CFStringRef targetIQN,io_iterator_t * itera
 {
     if(!iterator)
         return kIOReturnBadArgument;
-    
+
     io_object_t parallelDevice = iSCSIIORegistryGetTargetEntry(targetIQN);
-    
+
     if(parallelDevice == IO_OBJECT_NULL)
         return kIOReturnNotFound;
-    
+
     // The children of the IOSCSIParallelInterfaceDevice are IOSCSITargetDevices
     io_object_t target;
     IORegistryEntryGetChildEntry(parallelDevice,kIOServicePlane,&target);
@@ -139,13 +139,13 @@ kern_return_t iSCSIIORegistryGetLUNs(CFStringRef targetIQN,io_iterator_t * itera
         IOObjectRelease(parallelDevice);
         return kIOReturnNotFound;
     }
-    
+
     // The children of the target (IOSCSITargetDevice) are the LUNs
     kern_return_t result = IORegistryEntryGetChildIterator(target,kIOServicePlane,iterator);
-    
+
     IOObjectRelease(parallelDevice);
     IOObjectRelease(target);
-    
+
     return result;
 }
 
@@ -160,13 +160,13 @@ void iSCSIIORegistryIOMediaApplyFunction(io_object_t target,
     io_object_t entry = IO_OBJECT_NULL;
     io_iterator_t iterator = IO_OBJECT_NULL;
     IORegistryEntryGetChildIterator(target,kIOServicePlane,&iterator);
-    
+
     // Iterate over all children of the target object
     while((entry = IOIteratorNext(iterator)) != IO_OBJECT_NULL)
     {
         // Recursively call this function for each child of the target
         iSCSIIORegistryIOMediaApplyFunction(entry,callback,context);
-        
+
         // Find the IOMedia's root provider class (IOBlockStorageDriver) and
         // get the first child.  This ensures that we grab the IOMedia object
         // for the disk itself and not each individual partition
@@ -181,13 +181,13 @@ void iSCSIIORegistryIOMediaApplyFunction(io_object_t target,
             callback(child,context);
             IOObjectRelease(child);
         }
-        
+
         if(providerClass)
             CFRelease(providerClass);
-        
+
         IOObjectRelease(entry);
     }
-    
+
     IOObjectRelease(iterator);
 }
 
@@ -198,26 +198,26 @@ io_object_t iSCSIIORegistryFindIOMediaForLUN(io_object_t LUN)
 {
     io_object_t entry = IO_OBJECT_NULL;
     IORegistryEntryGetChildEntry(LUN,kIOServicePlane,&entry);
-    
+
     // Descend down the tree and find the first IOMedia class
     while(entry != IO_OBJECT_NULL)
     {
         CFStringRef class = IOObjectCopyClass(entry);
-        
+
         if(class && CFStringCompare(class,CFSTR(kIOMediaClass),0) == kCFCompareEqualTo) {
             CFRelease(class);
             return entry;
         }
         if(class)
             CFRelease(class);
-        
+
         // Descend down into the tree next time IOIteratorNext() is called
         io_object_t child;
         IORegistryEntryGetChildEntry(entry,kIOServicePlane,&child);
         IOObjectRelease(entry);
         entry = child;
     }
-    
+
     return IO_OBJECT_NULL;
 }
 
@@ -246,10 +246,10 @@ CFDictionaryRef iSCSIIORegistryCreateCFPropertiesForTarget(io_object_t target)
     // Get the IOSCSITargetDevice object (child of IOParallelInterfaceDevice or "target")
     io_object_t child;
     IORegistryEntryGetChildEntry(target,kIOServicePlane,&child);
-    
+
     if(child == IO_OBJECT_NULL)
         return NULL;
-    
+
     CFMutableDictionaryRef propertiesDict;
     IORegistryEntryCreateCFProperties(child,&propertiesDict,kCFAllocatorDefault,0);
 
@@ -272,10 +272,10 @@ CFDictionaryRef iSCSIIORegistryCreateCFPropertiesForLUN(io_object_t LUN)
 {
     if(LUN == IO_OBJECT_NULL)
         return NULL;
-    
+
     CFMutableDictionaryRef propertiesDict;
     IORegistryEntryCreateCFProperties(LUN,&propertiesDict,kCFAllocatorDefault,0);
-    
+
     return propertiesDict;
 }
 
@@ -293,10 +293,10 @@ CFDictionaryRef iSCSIIORegistryCreateCFPropertiesForIOMedia(io_object_t IOMedia)
 {
     if(IOMedia == IO_OBJECT_NULL)
         return NULL;
-    
+
     CFMutableDictionaryRef propertiesDict;
     IORegistryEntryCreateCFProperties(IOMedia,&propertiesDict,kCFAllocatorDefault,0);
-    
+
     return propertiesDict;
 }
 

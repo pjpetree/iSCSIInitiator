@@ -38,33 +38,33 @@ OSDefineMetaClassAndStructors(iSCSIInitiator,IOService);
 
 bool iSCSIInitiator::init(OSDictionary * dictionary)
 {
-	if(super::init(dictionary))
+    if(super::init(dictionary))
         return true;
-    
+
     return false;
 }
 
 void iSCSIInitiator::free(void)
 {
-	super::free();
+    super::free();
 }
 
 IOService * iSCSIInitiator::probe(IOService * provider, SInt32 * score)
 {
-	return super::probe(provider,score);
+    return super::probe(provider,score);
 }
 
 bool iSCSIInitiator::start(IOService * provider)
 {
-	if(super::start(provider))
+    if(super::start(provider))
     {
         registerService();
         return true;
     }
-	return false;
+    return false;
 }
 
 void iSCSIInitiator::stop(IOService * provider)
 {
-	super::stop(provider);
+    super::stop(provider);
 }

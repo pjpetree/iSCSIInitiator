@@ -157,11 +157,11 @@ enum iSCSIPDULoginStages {
     /*! Security negotiation, where initiator/target authenticate
      *  each other. */
     kiSCSIPDUSecurityNegotiation = 0,
-    
+
     /*! Operational negotation, where initiator/target negotiate
      *  whether to use digests, etc. */
     kiSCSIPDULoginOperationalNegotiation = 1,
-    
+
     /*! Full feature phase, where PDUs other than login PDUs can be
      *  sent or received. */
     kiSCSIPDUFullFeaturePhase = 3
@@ -169,13 +169,13 @@ enum iSCSIPDULoginStages {
 
 /*! Reasons for issuing a logout PDU, used with logout BHS. */
 enum iSCSIPDULogoutReasons {
-    /*! All commands associated with the session are terminated. 
+    /*! All commands associated with the session are terminated.
      *  (A session may consist of multiple connections.) */
     kiSCSIPDULogoutCloseSession = 0x00,
-    
+
     /*! All commands associated with the connection are terminated. */
     kISCSIPDULogoutCloseConnection = 0x01,
-    
+
     /*! The connection is removed and commands associated with the
      *  connection are prepared for association with a new connection. */
     kISCSIPDULogoutRemoveConnectionForRecovery = 0x02
@@ -183,33 +183,33 @@ enum iSCSIPDULogoutReasons {
 
 /*! Responses from a target to a logout request, received within logout BHS. */
 enum iSCSIPDULogoutRsp {
-    
+
     /*! The logout was successfully completed. */
     kiSCSIPDULogoutRspSuccess = 0x00,
-    
+
     /*! The connection Id was not found. */
     kiSCSIPDULogoutRspCIDNotFound = 0x01,
-    
+
     /*! Recovery is not supported for this connection or session. */
     kiSCSIPDULogoutRspRecoveryUnsupported = 0x02,
-    
+
     /*! Cleanup failed during logout. */
     kiSCSIPDULogoutRspCleanupFailed = 0x03
 };
 
 /*! General login responses from a target, receivd within login BHS. */
 enum iSCSIPDULoginRspStatusClass {
-    
+
     /*! Successfully logged onto the target. */
     kiSCSIPDULCSuccess = 0x00,
-    
+
     /*! The target has moved, the response contains redirection
      *  text keys ("TargetAddress=") that can be used to reconnect. */
     kiSCSIPDULCRedirection = 0x01,
-    
+
     /*! Initiator error (e.g., permission denied to requested resource). */
     kiSCSIPDULCInitiatorError = 0x02,
-    
+
     /*! Target error (e.g., target can't fulfill request). */
     kiSCISPDULCTargetError = 0x03
 };
@@ -303,7 +303,7 @@ void iSCSIPDUDataParseToArrays(void * data,size_t length,CFMutableArrayRef keys,
  *  @param length the length of the data segment.
  *  @param keyContainer the container to use for storing key strings (optional).
  *  @param valContainer the container to use for storing value strings (optional).
- *  @param callback a user-specified function that accepts key and value 
+ *  @param callback a user-specified function that accepts key and value
  *  containers and key and value strings (i.e. the specific parse functions
  *  defined above specify a particular callback that places the keys and values
  *  into a dictionary or into two separate arrays. */

@@ -35,36 +35,36 @@
 
 /*! Used to perform a login query during the login phase of a connection. */
 struct iSCSILoginQueryContext {
-    
+
     // These inputs are required when calling iSCSISessionLoginQuery()
-    
+
     /*! Reference to the HBA interface. */
     iSCSIHBAInterfaceRef interface;
-    
+
     /*! The session identifier. */
     SessionIdentifier sessionId;
-    
+
     /*! The connection identifier. */
     ConnectionIdentifier connectionId;
 
     /*! The current stage of negotiation process. */
     enum iSCSIPDULoginStages currentStage;
-    
+
     /*! The next stage of the negotiation process. */
     enum iSCSIPDULoginStages nextStage;
 
-    
+
     // These are returned by iSCSISessionLoginQuery()
-    
+
     /*! The status sequence number. */
     UInt32 statSN;
-    
+
     /*! The expected command sequence number. */
     UInt32 expCmdSN;
-    
+
     /*! The target session identifier. */
     TargetSessionIdentifier targetSessionId;
-    
+
     /*! Whether the target agrees to advance to next stage. */
     bool transitNextStage;
 };

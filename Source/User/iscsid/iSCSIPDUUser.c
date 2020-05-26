@@ -106,17 +106,17 @@ void iSCSIPDUDataParseCommon(void * data,size_t length,
 {
     if(!data || length == 0 || !callback)
         return;
-    
+
     // Parse the text response
     UInt8 * currentByte = data;
-    
+
     UInt8 * lastByte = currentByte + length;
     UInt8 * tokenStartByte = currentByte;
-    
+
     CFStringRef keyString = NULL, valString = NULL;
-    
+
     bool equalFound = false;
-    
+
     // Search through bytes and look for key=value pairs.  Convert key and
     // value strings to CFStrings and add to a dictionary
     while(currentByte <= lastByte)
@@ -129,7 +129,7 @@ void iSCSIPDUDataParseCommon(void * data,size_t length,
                                                 kCFStringEncodingUTF8,false);
             // Advance the starting point to skip the '='
             tokenStartByte = currentByte + 1;
-            
+
             // We've crossed from key to value
             equalFound = true;
         }
@@ -148,7 +148,7 @@ void iSCSIPDUDataParseCommon(void * data,size_t length,
             CFRelease(keyString);
             CFRelease(valString);
             keyString = valString = NULL;
-            
+
             // Reset for next key-value pair (this allows extra 0's for padding
             // if the string should contain any)
             equalFound = false;
@@ -160,7 +160,7 @@ void iSCSIPDUDataParseCommon(void * data,size_t length,
         CFRelease(keyString);
         keyString = NULL;
     }
-    
+
     if(valString) {
         CFRelease(valString);
         valString = NULL;
@@ -182,7 +182,7 @@ void iSCSIPDUDataParseToDict(void * data,size_t length,CFMutableDictionaryRef te
 {
     if(!data || length == 0 || !textDict)
         return;
-    
+
     iSCSIPDUDataParseCommon(data,length,textDict,textDict,&iSCSIPDUDataParseToDictCallback);
 }
 
@@ -203,7 +203,7 @@ void iSCSIPDUDataParseToArrays(void * data,size_t length,CFMutableArrayRef keys,
 {
     if(!data || length == 0 || !values)
         return;
-    
+
     iSCSIPDUDataParseCommon(data,length,keys,values,&iSCSIPDUDataParseToDictCallback);
 }
 
@@ -248,41 +248,41 @@ void iSCSIPDUPopulateWithTextCommand(const void * key,
 {
     const int MAX_KEY_SIZE = 100;
     const int MAX_VAL_SIZE = 100;
-    
+
     // Ensure pointer to data segment is valid
     if(posTracker)
     {
         CFIndex keyByteSize = CFStringGetLength((CFStringRef)key);
         CFIndex valueByteSize = CFStringGetLength((CFStringRef)value);
         CFStringEncoding stringEncoding = kCFStringEncodingUTF8;
-        
+
         char keyCString[MAX_KEY_SIZE];
         char valueCString[MAX_VAL_SIZE];
-        
+
         Boolean validKeyCString = CFStringGetCString(key,keyCString,MAX_KEY_SIZE,stringEncoding);
         Boolean validValueCString = CFStringGetCString(value,valueCString,MAX_VAL_SIZE,stringEncoding);
-        
+
         // If both strings are valid C-strings, copy them into the PDU
         if(validKeyCString && validValueCString)
         {
             iSCSIPDUDataSegmentTracker * position =
                 (iSCSIPDUDataSegmentTracker*)posTracker;
-            
+
             // Copy key
             memcpy(position->dataSegmentPosition,keyCString,keyByteSize);
             position->dataSegmentPosition =
                 position->dataSegmentPosition + keyByteSize;
-            
+
             // Add '='
             memset(position->dataSegmentPosition,'=',1);
             position->dataSegmentPosition =
                 position->dataSegmentPosition + 1;
-            
+
             // Copy value
             memcpy(position->dataSegmentPosition,valueCString,valueByteSize);
             position->dataSegmentPosition =
                 position->dataSegmentPosition + valueByteSize;
-            
+
             // Add null terminator
             memset(position->dataSegmentPosition,0,1);
             position->dataSegmentPosition = position->dataSegmentPosition + 1;
@@ -298,7 +298,7 @@ void iSCSIPDUDataCreateFromDict(CFDictionaryRef textDict,void ** data,size_t * l
 {
     if(!length || !data || !textDict)
         return;
-    
+
     // Apply a function to key-value pairs to determine total byte size of
     // the text commands
     CFIndex cmdByteSize = 0;
@@ -310,12 +310,12 @@ void iSCSIPDUDataCreateFromDict(CFDictionaryRef textDict,void ** data,size_t * l
         *length = 0;
         return;
     }
- 
+
     *length = cmdByteSize;
-    
+
     iSCSIPDUDataSegmentTracker posTracker;
     posTracker.dataSegmentPosition = *data;
-    
+
     // Apply a function to iterate over key-value pairs and add them to this PDU
     CFDictionaryApplyFunction(textDict,&iSCSIPDUPopulateWithTextCommand,&posTracker);
 }

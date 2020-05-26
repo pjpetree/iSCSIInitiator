@@ -46,18 +46,18 @@ Boolean iSCSIUtilsValidateIQN(CFStringRef IQN)
     const char pattern[] =  "^iqn[.][0-9]{4}-[0-9]{2}[.][[:alnum:]]{1,}[.]"
                             "[-A-Za-z0-9.]{1,255}"
                             "|^eui[.][[:xdigit:]]{16}$";
-    
+
     Boolean validName = false;
     regex_t preg;
     regcomp(&preg,pattern,REG_EXTENDED | REG_NOSUB);
-    
+
     CFIndex IQNLength = CFStringGetMaximumSizeForEncoding(CFStringGetLength(IQN),kCFStringEncodingASCII) + sizeof('\0');
     char IQNBuffer[IQNLength];
     CFStringGetCString(IQN,IQNBuffer,IQNLength,kCFStringEncodingASCII);
 
     if(regexec(&preg,IQNBuffer,0,NULL,0) == 0)
         validName = true;
-    
+
     regfree(&preg);
     return validName;
 }
@@ -83,11 +83,11 @@ CFArrayRef iSCSIUtilsCreateArrayByParsingPortalParts(CFStringRef portal)
 {
     // Regular expressions to match valid IPv4, IPv6 and DNS portal strings
     const char IPv4Pattern[] = "^((((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|([0-9])?[0-9])[.]){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|([0-9])?[0-9]))(:([0-9]{1,5}))?)$";
-    
+
     const char IPv6Pattern[] = "^([[]?(([A-Fa-f0-9]{0,4}:){1,7}[A-Fa-f0-9]{0,4})([]]:([0-9]{1,5})?)?)$";
-    
+
     const char DNSPattern[] = "^((([A-Za-z0-9]{1,63}[.]){1,3}[A-Za-z0-9]{1,63})(:([0-9]{1,5}))?)$";
-    
+
     // Array of patterns to iterate, the indices of the matches that
     // correspond to the hostname, port and the maximum number of matches
     // Start with IPv4 as that is the most restrictive pattern, then work
@@ -96,17 +96,17 @@ CFArrayRef iSCSIUtilsCreateArrayByParsingPortalParts(CFStringRef portal)
     const int  maxMatches[] = {10, 6, 6};
     const int   hostIndex[] = {2, 2, 2};
     const int   portIndex[] = {9, 5, 5};
-    
+
     int index = 0;
-    
+
     do
     {
         regex_t preg;
         regcomp(&preg,patterns[index],REG_EXTENDED);
-        
+
         regmatch_t matches[maxMatches[index]];
         memset(matches,0,sizeof(regmatch_t)*maxMatches[index]);
-       
+
         CFIndex portalLength = CFStringGetMaximumSizeForEncoding(CFStringGetLength(portal),kCFStringEncodingASCII) + sizeof('\0');
         char portalBuffer[portalLength];
         CFStringGetCString(portal,portalBuffer,portalLength,kCFStringEncodingASCII);
@@ -118,9 +118,9 @@ CFArrayRef iSCSIUtilsCreateArrayByParsingPortalParts(CFStringRef portal)
             index++;
             continue;
         }
-        
+
         CFMutableArrayRef portalParts = CFArrayCreateMutable(kCFAllocatorDefault,0,&kCFTypeArrayCallBacks);
-        
+
         // Get the host name
         if(matches[hostIndex[index]].rm_so != -1)
         {
@@ -128,11 +128,11 @@ CFArrayRef iSCSIUtilsCreateArrayByParsingPortalParts(CFStringRef portal)
                                             matches[hostIndex[index]].rm_eo - matches[hostIndex[index]].rm_so);
             CFStringRef host = CFStringCreateWithSubstring(kCFAllocatorDefault,
                                                            portal,rangeHost);
-            
+
             CFArrayAppendValue(portalParts,host);
             CFRelease(host);
         }
-        
+
         // Is the port available?  If so, set it...
         if(matches[portIndex[index]].rm_so != -1)
         {
@@ -143,12 +143,12 @@ CFArrayRef iSCSIUtilsCreateArrayByParsingPortalParts(CFStringRef portal)
             CFArrayAppendValue(portalParts,port);
             CFRelease(port);
         }
-        
+
         regfree(&preg);
         return portalParts;
-        
+
     } while(index < sizeof(patterns)/sizeof(const char *));
-    
+
     return NULL;
 }
 
@@ -286,43 +286,43 @@ errno_t iSCSIUtilsGetAddressForPortal(iSCSIPortalRef portal,
 {
     if (!portal || !remoteAddress || !localAddress)
         return EINVAL;
-    
+
     errno_t error = 0;
-    
+
     // Resolve the target node first and get a sockaddr info for it
     CFStringRef targetAddr = iSCSIPortalGetAddress(portal);
     CFIndex targetAddrLength = CFStringGetMaximumSizeForEncoding(CFStringGetLength(targetAddr),kCFStringEncodingASCII) + sizeof('\0');
     char targetAddrBuffer[targetAddrLength];
     CFStringGetCString(targetAddr,targetAddrBuffer,targetAddrLength,kCFStringEncodingASCII);
-    
+
     CFStringRef targetPort = iSCSIPortalGetPort(portal);
     CFIndex targetPortLength = CFStringGetMaximumSizeForEncoding(CFStringGetLength(targetPort),kCFStringEncodingASCII) + sizeof('\0');
     char targetPortBuffer[targetPortLength];
     CFStringGetCString(targetPort,targetPortBuffer,targetPortLength,kCFStringEncodingASCII);
-    
+
     struct addrinfo hints = {
         .ai_family = AF_UNSPEC,
         .ai_socktype = SOCK_STREAM,
         .ai_protocol = IPPROTO_TCP,
     };
-    
+
     struct addrinfo * aiTarget = NULL;
     if((error = getaddrinfo(targetAddrBuffer,targetPortBuffer,&hints,&aiTarget)))
         return error;
-    
+
     // Copy the sock_addr structure into a sockaddr_storage structure (this
     // may be either an IPv4 or IPv6 sockaddr structure)
     memcpy(remoteAddress,aiTarget->ai_addr,aiTarget->ai_addrlen);
-    
+
     freeaddrinfo(aiTarget);
-    
+
     // If the default interface is to be used, prepare a structure for it
     CFStringRef hostIface = iSCSIPortalGetHostInterface(portal);
-    
+
     if(CFStringCompare(hostIface,kiSCSIDefaultHostInterface,0) == kCFCompareEqualTo)
     {
         localAddress->ss_family = remoteAddress->ss_family;
-        
+
         // For completeness, setup the sockaddr_in structure
         if(localAddress->ss_family == AF_INET)
         {
@@ -331,27 +331,27 @@ errno_t iSCSIUtilsGetAddressForPortal(iSCSIPortalRef portal,
             sa->sin_addr.s_addr = htonl(INADDR_ANY);
             sa->sin_len = sizeof(struct sockaddr_in);
         }
-        
+
         // TODO: test IPv6 functionality
         else if(localAddress->ss_family == AF_INET6)
         {
             struct sockaddr_in6 * sa = (struct sockaddr_in6 *)localAddress;
             sa->sin6_addr = in6addr_any;
         }
-        
+
         return error;
     }
-    
+
     // Otherwise we have to search the list of all interfaces for the specified
     // interface and copy the corresponding address structure
     struct ifaddrs * interfaceList;
-    
+
     if((error = getifaddrs(&interfaceList)))
         return error;
-    
+
     error = EAFNOSUPPORT;
     struct ifaddrs * interface = interfaceList;
-    
+
     while(interface)
     {
         // Check if interface supports the targets address family (e.g., IPv4)
@@ -362,7 +362,7 @@ errno_t iSCSIUtilsGetAddressForPortal(iSCSIPortalRef portal,
                                                                     interface->ifa_name,
                                                                     kCFStringEncodingUTF8,
                                                                     kCFAllocatorNull);
-            
+
             Boolean ifaceNameMatch =
             CFStringCompare(currIface,hostIface,kCFCompareCaseInsensitive) == kCFCompareEqualTo;
             CFRelease(currIface);
@@ -376,7 +376,7 @@ errno_t iSCSIUtilsGetAddressForPortal(iSCSIPortalRef portal,
         }
         interface = interface->ifa_next;
     }
-    
+
     freeifaddrs(interfaceList);
     return error;
 }

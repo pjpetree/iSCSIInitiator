@@ -48,7 +48,7 @@ typedef void (*iSCSIKernelNotificationCallback)(enum iSCSIKernelNotificationType
 
 /*! Opens a connection to the iSCSI initiator.  A connection must be
  *  successfully opened before any of the supporting functions below can be
- *  called.  A callback function is used to process notifications from the 
+ *  called.  A callback function is used to process notifications from the
  *  iSCSI kernel extension.
  *  @param callback the callback function to process notifications.
  *  @return error code indicating the result of the operation. */
@@ -135,7 +135,7 @@ errno_t iSCSIKernelCreateConnection(SID sessionId,
 errno_t iSCSIKernelReleaseConnection(SID sessionId,CID connectionId);
 
 /*! Sends data over a kernel socket associated with iSCSI. The data sent should
- *  be specified by the buffer pointer to by data, with a length given by 
+ *  be specified by the buffer pointer to by data, with a length given by
  *  length.  The size of the buffer (length) should include any padding required
  *  to achieve 4-byte alignment.
  *  @param sessionId the qualifier part of the ISID (see RFC3720).

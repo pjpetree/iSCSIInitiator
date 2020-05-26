@@ -142,13 +142,13 @@ CFMutableDictionaryRef iSCSIPreferencesCopyPropertyDict(CFStringRef kAppId,CFStr
                                                           kCFPreferencesCurrentHost);
     if(!preferences)
         return NULL;
-    
+
     // Create a deep copy to make the dictionary mutable
     CFMutableDictionaryRef mutablePropertyList = (CFMutableDictionaryRef)CFPropertyListCreateDeepCopy(
         kCFAllocatorDefault,
         preferences,
         kCFPropertyListMutableContainersAndLeaves);
-    
+
     // Release original retrieved property
     CFRelease(preferences);
     return mutablePropertyList;
@@ -231,24 +231,24 @@ CFMutableDictionaryRef iSCSIPreferencesCreateTargetDict()
 CFMutableDictionaryRef iSCSIPreferencesGetInitiatorDict(iSCSIPreferencesRef preferences,Boolean createIfMissing)
 {
     CFMutableDictionaryRef initiatorDict = (CFMutableDictionaryRef)CFDictionaryGetValue(preferences,kiSCSIPKInitiator);
-    
+
     if(createIfMissing && !initiatorDict) {
         initiatorDict = iSCSIPreferencesCreateInitiatorDict();
         CFDictionarySetValue(preferences,kiSCSIPKInitiator,initiatorDict);
     }
-    
+
     return initiatorDict;
 }
 
 CFMutableDictionaryRef iSCSIPreferencesGetDiscoveryDict(iSCSIPreferencesRef preferences,Boolean createIfMissing)
 {
     CFMutableDictionaryRef discoveryDict = (CFMutableDictionaryRef)CFDictionaryGetValue(preferences,kiSCSIPKDiscovery);
-    
+
     if(createIfMissing && !discoveryDict) {
         discoveryDict = iSCSIPreferencesCreateDiscoveryDict();
         CFDictionarySetValue(preferences,kiSCSIPKDiscovery,discoveryDict);
     }
-    
+
     return discoveryDict;
 }
 
@@ -302,12 +302,12 @@ CFArrayRef iSCSIPreferencesGetDynamicTargetsForSendTargets(iSCSIPreferencesRef p
 CFMutableDictionaryRef iSCSIPreferencesGetTargets(iSCSIPreferencesRef preferences,Boolean createIfMissing)
 {
     CFMutableDictionaryRef targetsDict = (CFMutableDictionaryRef)CFDictionaryGetValue(preferences,kiSCSIPKTargets);
-    
+
     if(createIfMissing && !targetsDict) {
         targetsDict = iSCSIPreferencesCreateTargetsDict();
         CFDictionarySetValue(preferences,kiSCSIPKTargets,targetsDict);
     }
-    
+
     return targetsDict;
 }
 
@@ -319,7 +319,7 @@ CFMutableDictionaryRef iSCSIPreferencesGetTargetDict(iSCSIPreferencesRef prefere
 {
     // Get list of targets
     CFMutableDictionaryRef targetsList = iSCSIPreferencesGetTargets(preferences,createIfMissing);
-    
+
     if(targetsList)
     {
         if(createIfMissing && CFDictionaryGetCountOfKey(targetsList,targetIQN) == 0)
@@ -328,7 +328,7 @@ CFMutableDictionaryRef iSCSIPreferencesGetTargetDict(iSCSIPreferencesRef prefere
             CFDictionarySetValue(targetsList,targetIQN,targetDict);
             CFRelease(targetDict);
         }
-        
+
         return (CFMutableDictionaryRef)CFDictionaryGetValue(targetsList,targetIQN);
     }
     return NULL;
@@ -341,7 +341,7 @@ CFMutableDictionaryRef iSCSIPreferencesGetPortalsList(iSCSIPreferencesRef prefer
     // Get the target information dictionary
     CFMutableDictionaryRef targetDict = iSCSIPreferencesGetTargetDict(preferences,targetIQN,createIfMissing);
 
-    
+
     if(targetDict)
     {
         if(createIfMissing && CFDictionaryGetCountOfKey(targetDict,kiSCSIPKPortals) == 0)
@@ -350,7 +350,7 @@ CFMutableDictionaryRef iSCSIPreferencesGetPortalsList(iSCSIPreferencesRef prefer
                 kCFAllocatorDefault,0,
                 &kCFTypeDictionaryKeyCallBacks,
                 &kCFTypeDictionaryValueCallBacks);
-            
+
             CFDictionarySetValue(targetDict,kiSCSIPKPortals,portalsList);
             CFRelease(portalsList);
         }
@@ -632,7 +632,7 @@ void iSCSIPreferencesRemovePortalForTarget(iSCSIPreferencesRef preferences,
                                   CFStringRef portalAddress)
 {
     CFMutableDictionaryRef portalsList = iSCSIPreferencesGetPortalsList(preferences,targetIQN,false);
-    
+
     // Remove target if only one portal is left...
     if(portalsList) {
         if(CFDictionaryGetCount(portalsList) == 1)
@@ -651,7 +651,7 @@ void iSCSIPreferencesSetAutoLoginForTarget(iSCSIPreferencesRef preferences,
                                   Boolean autoLogin)
 {
     CFMutableDictionaryRef targetDict = iSCSIPreferencesGetTargetDict(preferences,targetIQN,true);
-    
+
     if(targetDict) {
         if(autoLogin)
             CFDictionarySetValue(targetDict,kiSCSIPKAutoLogin,kCFBooleanTrue);
@@ -672,7 +672,7 @@ Boolean iSCSIPreferencesGetAutoLoginForTarget(iSCSIPreferencesRef preferences,
         if(CFDictionaryGetValue(targetDict,kiSCSIPKAutoLogin) == kCFBooleanTrue)
             autoLogin = true;
     }
-    
+
     return autoLogin;
 }
 
@@ -686,7 +686,7 @@ void iSCSIPreferencesSetPersistenceForTarget(iSCSIPreferencesRef preferences,
                                              Boolean persistent)
 {
     CFMutableDictionaryRef targetDict = iSCSIPreferencesGetTargetDict(preferences,targetIQN,true);
-    
+
     if(targetDict) {
         if(persistent)
             CFDictionarySetValue(targetDict,kiSCSIPKPersistent,kCFBooleanTrue);
@@ -704,12 +704,12 @@ Boolean iSCSIPreferencesGetPersistenceForTarget(iSCSIPreferencesRef preferences,
 {
     CFMutableDictionaryRef targetDict = iSCSIPreferencesGetTargetDict(preferences,targetIQN,true);
     Boolean persistent = false;
-    
+
     if(targetDict) {
         if(CFDictionaryGetValue(targetDict,kiSCSIPKPersistent) == kCFBooleanTrue)
             persistent = true;
     }
-    
+
     return persistent;
 }
 
@@ -789,7 +789,7 @@ void iSCSIPreferencesRemoveTarget(iSCSIPreferencesRef preferences,
                          CFStringRef targetIQN)
 {
     CFMutableDictionaryRef targetsList = iSCSIPreferencesGetTargets(preferences,false);
-    
+
     if(targetsList) {
         CFDictionaryRemoveValue(targetsList,targetIQN);
     }
@@ -803,15 +803,15 @@ void iSCSIPreferencesRemoveTarget(iSCSIPreferencesRef preferences,
 CFStringRef iSCSIPreferencesCopyInitiatorIQN(iSCSIPreferencesRef preferences)
 {
     CFMutableDictionaryRef initiatorDict = (CFMutableDictionaryRef)CFDictionaryGetValue(preferences,kiSCSIPKInitiator);
-    
+
     if(!initiatorDict) {
         initiatorDict = iSCSIPreferencesCreateInitiatorDict();
     }
-    
+
     // Lookup and copy the initiator name from the dictionary
     CFStringRef initiatorIQN = CFStringCreateCopy(
         kCFAllocatorDefault,CFDictionaryGetValue(initiatorDict,kiSCSIPKInitiatorIQN));
-    
+
     return initiatorIQN;
 }
 
@@ -820,7 +820,7 @@ CFStringRef iSCSIPreferencesCopyInitiatorIQN(iSCSIPreferencesRef preferences)
 void iSCSIPreferencesSetInitiatorIQN(iSCSIPreferencesRef preferences,CFStringRef initiatorIQN)
 {
     CFMutableDictionaryRef initiatorDict = (CFMutableDictionaryRef)CFDictionaryGetValue(preferences,kiSCSIPKInitiator);
-    
+
     if(!initiatorDict) {
         initiatorDict = iSCSIPreferencesCreateInitiatorDict();
         CFDictionarySetValue(preferences,kiSCSIPKInitiator,initiatorDict);
@@ -847,15 +847,15 @@ void iSCSIPreferencesSetInitiatorIQN(iSCSIPreferencesRef preferences,CFStringRef
 CFStringRef iSCSIPreferencesCopyInitiatorAlias(iSCSIPreferencesRef preferences)
 {
     CFMutableDictionaryRef initiatorDict = (CFMutableDictionaryRef)CFDictionaryGetValue(preferences,kiSCSIPKInitiator);
-    
+
     if(!initiatorDict) {
         initiatorDict = iSCSIPreferencesCreateInitiatorDict();
     }
-    
+
     // Lookup and copy the initiator alias from the dictionary
     CFStringRef initiatorAlias = CFStringCreateCopy(
         kCFAllocatorDefault,CFDictionaryGetValue(initiatorDict,kiSCSIPKInitiatorAlias));
-    
+
     return initiatorAlias;
 }
 
@@ -864,12 +864,12 @@ CFStringRef iSCSIPreferencesCopyInitiatorAlias(iSCSIPreferencesRef preferences)
 void iSCSIPreferencesSetInitiatorAlias(iSCSIPreferencesRef preferences,CFStringRef initiatorAlias)
 {
     CFMutableDictionaryRef initiatorDict = (CFMutableDictionaryRef)CFDictionaryGetValue(preferences,kiSCSIPKInitiator);
-    
+
     if(!initiatorDict) {
         initiatorDict = iSCSIPreferencesCreateInitiatorDict();
         CFDictionarySetValue(preferences,kiSCSIPKInitiator,initiatorDict);
     }
-    
+
     // Update initiator alias
     CFDictionarySetValue(initiatorDict,kiSCSIPKInitiatorAlias,initiatorAlias);
 }
@@ -916,18 +916,18 @@ Boolean iSCSIPreferencesContainsPortalForSendTargetsDiscovery(iSCSIPreferencesRe
 CFArrayRef iSCSIPreferencesCreateArrayOfTargets(iSCSIPreferencesRef preferences)
 {
     CFDictionaryRef targetsList = iSCSIPreferencesGetTargets(preferences,false);
-    
+
     if(!targetsList)
         return NULL;
 
     const CFIndex keyCount = CFDictionaryGetCount(targetsList);
-    
+
     if(keyCount == 0)
         return NULL;
-  
+
     const void * keys[keyCount];
     CFDictionaryGetKeysAndValues(targetsList,keys,NULL);
-    
+
     return CFArrayCreate(kCFAllocatorDefault,keys,keyCount,&kCFTypeArrayCallBacks);
 }
 
@@ -955,18 +955,18 @@ CFArrayRef iSCSIPreferencesCreateArrayOfPortalsForTarget(iSCSIPreferencesRef pre
                                                 CFStringRef targetIQN)
 {
     CFMutableDictionaryRef portalsList = iSCSIPreferencesGetPortalsList(preferences,targetIQN,false);
-    
+
     if(!portalsList)
         return NULL;
-    
+
     const CFIndex keyCount = CFDictionaryGetCount(portalsList);
-    
+
     if(keyCount == 0)
         return NULL;
-    
+
     const void * keys[keyCount];
     CFDictionaryGetKeysAndValues(portalsList,keys,NULL);
-    
+
     return CFArrayCreate(kCFAllocatorDefault,keys,keyCount,&kCFTypeArrayCallBacks);
 }
 
@@ -981,7 +981,7 @@ void iSCSIPreferencesSetTargetIQN(iSCSIPreferencesRef preferences,
     // Do not allow a change in IQN for dynamically configured targets
     if(iSCSIPreferencesGetTargetConfigType(preferences,existingIQN) != kiSCSITargetConfigStatic)
         return;
-    
+
     CFMutableDictionaryRef targetNodes = iSCSIPreferencesGetTargets(preferences,false);
     CFMutableDictionaryRef target = iSCSIPreferencesGetTargetDict(preferences,existingIQN,false);
 
@@ -1009,7 +1009,7 @@ void iSCSIPreferencesSetTargetAlias(iSCSIPreferencesRef preferences,
                            CFStringRef alias)
 {
     CFMutableDictionaryRef targetDict = iSCSIPreferencesGetTargetDict(preferences,targetIQN,false);
-    
+
     if(targetDict)
         CFDictionarySetValue(targetDict,kiSCSIPKTargetAlias,alias);
 }
@@ -1023,7 +1023,7 @@ CFStringRef iSCSIPreferencesGetTargetAlias(iSCSIPreferencesRef preferences,CFStr
 
     if(targetDict)
         return CFDictionaryGetValue(targetDict,kiSCSIPKTargetAlias);
-    
+
     return kiSCSIUnspecifiedTargetAlias;
 }
 
@@ -1117,10 +1117,10 @@ CFStringRef iSCSIPreferencesGetDiscoveryPortalForTarget(iSCSIPreferencesRef pref
 {
     CFStringRef discoveryPortal = NULL;
     CFMutableDictionaryRef targetDict = iSCSIPreferencesGetTargetDict(preferences,targetIQN,false);
-    
+
     if(targetDict)
         discoveryPortal = CFDictionaryGetValue(targetDict,kiSCSIPKSendTargetsPortal);
-    
+
     return discoveryPortal;
 }
 
@@ -1359,11 +1359,11 @@ iSCSIPreferencesRef iSCSIPreferencesCreateWithDictionary(CFDictionaryRef dict)
 {
     if(!dict)
         return NULL;
-    
+
     // Create a deep copy to make the dictionary mutable
     CFMutableDictionaryRef mutablePropertyList = (CFMutableDictionaryRef)CFPropertyListCreateDeepCopy(
             kCFAllocatorDefault,dict,kCFPropertyListMutableContainersAndLeaves);
-    
+
     return mutablePropertyList;
 }
 
@@ -1373,12 +1373,12 @@ iSCSIPreferencesRef iSCSIPreferencesCreateWithDictionary(CFDictionaryRef dict)
 iSCSIPreferencesRef iSCSIPreferencesCreateWithData(CFDataRef data)
 {
     CFPropertyListFormat format;
-    
+
     iSCSIPreferencesRef preferences = (iSCSIPreferencesRef)CFPropertyListCreateWithData(kCFAllocatorDefault,data,0,&format,NULL);
-    
+
     if(format == kCFPropertyListBinaryFormat_v1_0)
         return preferences;
-    
+
     CFRelease(preferences);
     return NULL;
 }
@@ -1389,25 +1389,25 @@ void iSCSIPreferencesUpdateWithAppValues(iSCSIPreferencesRef preferences)
 {
     // Refresh from preferences
     CFDictionaryRef dict = NULL;
-    
+
     dict = iSCSIPreferencesCopyPropertyDict(kiSCSIPKAppId,kiSCSIPKInitiator);
-    
+
     if(dict) {
         CFDictionarySetValue(preferences,kiSCSIPKInitiator,dict);
         CFRelease(dict);
         dict = NULL;
     }
-    
+
     dict = iSCSIPreferencesCopyPropertyDict(kiSCSIPKAppId,kiSCSIPKTargets);
-    
+
     if(dict) {
         CFDictionarySetValue(preferences,kiSCSIPKTargets,dict);
         CFRelease(dict);
         dict = NULL;
     }
-    
+
     dict = iSCSIPreferencesCopyPropertyDict(kiSCSIPKAppId,kiSCSIPKDiscovery);
-    
+
     if(dict) {
         CFDictionarySetValue(preferences,kiSCSIPKDiscovery,dict);
         CFRelease(dict);

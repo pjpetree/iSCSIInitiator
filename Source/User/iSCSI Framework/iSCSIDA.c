@@ -45,22 +45,22 @@ void iSCSIDADiskUnmountComplete(DADiskRef disk,DADissenterRef dissenter,void * c
 {
     iSCSIDiskOperationContext * opContext = (iSCSIDiskOperationContext*)context;
     opContext->processedCount++;
-    
+
     if(!dissenter)
         opContext->successCount++;
-    
+
     if(opContext->diskCount == opContext->processedCount) {
         enum iSCSIDAOperationResult result = kISCSIDAOperationPartialSuccess;
-        
+
         if(opContext->processedCount == opContext->successCount)
             result = kiSCSIDAOperationSuccess;
         else if(opContext->successCount == 0)
             result = kiSCSIDAOperationFail;
-        
+
         // If callback was specified...
         if(opContext->callback)
             (*opContext->callback)(opContext->target,result,opContext->context);
-        
+
         free(opContext);
     }
 }
@@ -69,22 +69,22 @@ void iSCSIDADiskMountComplete(DADiskRef disk,DADissenterRef dissenter,void * con
 {
     iSCSIDiskOperationContext * opContext = (iSCSIDiskOperationContext*)context;
     opContext->processedCount++;
-    
+
     if(!dissenter)
         opContext->successCount++;
-    
+
     if(opContext->diskCount == opContext->processedCount) {
         enum iSCSIDAOperationResult result = kISCSIDAOperationPartialSuccess;
-        
+
         if(opContext->processedCount == opContext->successCount)
             result = kiSCSIDAOperationSuccess;
         else if(opContext->successCount == 0)
             result = kiSCSIDAOperationFail;
-        
+
         // If callback was specified...
         if(opContext->callback)
             (*opContext->callback)(opContext->target,result,opContext->context);
-        
+
         free(opContext);
     }
 }
@@ -94,7 +94,7 @@ void iSCSIDAUnmountApplierFunc(io_object_t entry, void * context)
 {
     iSCSIDiskOperationContext * opContext = (iSCSIDiskOperationContext*)context;
     DADiskRef disk = DADiskCreateFromIOMedia(kCFAllocatorDefault,opContext->session,entry);
-    
+
     if(disk) {
         DADiskUnmount(disk,opContext->options,iSCSIDADiskUnmountComplete,context);
         CFRelease(disk);
@@ -115,8 +115,8 @@ void iSCSIDAUnmountForTarget(DASessionRef session,
     // Find the target associated with the session
     CFStringRef targetIQN = iSCSITargetGetIQN(target);
     io_object_t targetObj = iSCSIIORegistryGetTargetEntry(targetIQN);
-    
-    
+
+
     iSCSIDiskOperationContext * opContext = malloc(sizeof(iSCSIDiskOperationContext));
     opContext->callback = callback;
     opContext->session = session;
@@ -126,7 +126,7 @@ void iSCSIDAUnmountForTarget(DASessionRef session,
     opContext->processedCount = 0;
     opContext->successCount = 0;
     opContext->options = options;
-    
+
     // Queue unmount all IOMedia objects
     if(target != IO_OBJECT_NULL)
         iSCSIIORegistryIOMediaApplyFunction(targetObj,&iSCSIDAUnmountApplierFunc,opContext);
@@ -136,9 +136,9 @@ void iSCSIDAUnmountForTarget(DASessionRef session,
 void iSCSIDAMountApplierFunc(io_object_t entry, void * context)
 {
     iSCSIDiskOperationContext * opContext = (iSCSIDiskOperationContext*)context;
-    
+
     DADiskRef disk = DADiskCreateFromIOMedia(kCFAllocatorDefault,opContext->session,entry);
-    
+
     if(disk) {
         DADiskMount(disk,NULL,opContext->options,iSCSIDADiskMountComplete,context);
         CFRelease(disk);
@@ -158,7 +158,7 @@ void iSCSIDAMountForTarget(DASessionRef session,
     // Find the target associated with the session
     CFStringRef targetIQN = iSCSITargetGetIQN(target);
     io_object_t targetObj = iSCSIIORegistryGetTargetEntry(targetIQN);
-    
+
     iSCSIDiskOperationContext * opContext = malloc(sizeof(iSCSIDiskOperationContext));
     opContext->callback = callback;
     opContext->session = session;
@@ -168,7 +168,7 @@ void iSCSIDAMountForTarget(DASessionRef session,
     opContext->processedCount = 0;
     opContext->successCount = 0;
     opContext->options = options;
-    
+
     // Queue mount all IOMedia objects
     if(target != IO_OBJECT_NULL)
         iSCSIIORegistryIOMediaApplyFunction(targetObj,&iSCSIDAMountApplierFunc,opContext);

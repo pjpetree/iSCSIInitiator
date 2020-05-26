@@ -30,6 +30,7 @@
 #include "iSCSIDaemonInterfaceShared.h"
 
 #include <sys/select.h>
+#include <sys/time.h>
 
 /*! Timeout used when connecting to daemon. */
 static const int kiSCSIDaemonConnectTimeoutMilliSec = 100;
@@ -145,7 +146,7 @@ iSCSIDaemonHandle iSCSIDaemonConnect()
             // Set send & receive timeouts
             memset(&tv,0,sizeof(tv));
             tv.tv_sec = kiSCSIDaemonDefaultTimeoutSec;
-            
+
             setsockopt(handle,SOL_SOCKET,SO_SNDTIMEO,&tv,sizeof(tv));
             setsockopt(handle,SOL_SOCKET,SO_RCVTIMEO,&tv,sizeof(tv));
         }
@@ -189,10 +190,10 @@ errno_t iSCSIDaemonLogin(iSCSIDaemonHandle handle,
         portalData = iSCSIPortalCreateData(portal);
         cmd.portalLength = (UInt32)CFDataGetLength(portalData);
     }
-    
+
     AuthorizationExternalForm authExtForm;
     AuthorizationMakeExternalForm(authorization,&authExtForm);
-    
+
     CFDataRef authData = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
                                                      (UInt8*)&authExtForm.bytes,
                                                      kAuthorizationExternalFormLength,
@@ -200,7 +201,7 @@ errno_t iSCSIDaemonLogin(iSCSIDaemonHandle handle,
 
     errno_t error = iSCSIDaemonSendMsg(handle,(iSCSIDMsgGeneric *)&cmd,
                                        authData,targetData,portalData,NULL);
-    
+
     if(portal)
         CFRelease(portalData);
     CFRelease(targetData);
@@ -250,10 +251,10 @@ errno_t iSCSIDaemonLogout(iSCSIDaemonHandle handle,
         portalData = iSCSIPortalCreateData(portal);
         cmd.portalLength = (UInt32)CFDataGetLength(portalData);
     }
-    
+
     AuthorizationExternalForm authExtForm;
     AuthorizationMakeExternalForm(authorization,&authExtForm);
-    
+
     CFDataRef authData = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
                                                      (UInt8*)&authExtForm.bytes,
                                                      kAuthorizationExternalFormLength,
@@ -261,7 +262,7 @@ errno_t iSCSIDaemonLogout(iSCSIDaemonHandle handle,
 
     errno_t error = iSCSIDaemonSendMsg(handle,(iSCSIDMsgGeneric *)&cmd,
                                        authData,targetData,portalData,NULL);
-    
+
     if(portal)
         CFRelease(portalData);
     CFRelease(targetData);
@@ -276,7 +277,7 @@ errno_t iSCSIDaemonLogout(iSCSIDaemonHandle handle,
 
     // At this point we have a valid response, process it
     *statusCode = rsp.statusCode;
-    
+
     return rsp.errorCode;
 }
 
@@ -347,7 +348,7 @@ Boolean iSCSIDaemonIsPortalActive(iSCSIDaemonHandle handle,
 
     if(rsp.funcCode != kiSCSIDIsPortalActive)
         return false;
-    
+
     return rsp.active;
 }
 
@@ -367,22 +368,22 @@ errno_t iSCSIDaemonQueryTargetForAuthMethod(iSCSIDaemonHandle handle,
     // Validate inputs
     if(handle < 0 || !portal || !targetIQN || !authMethod || !statusCode)
         return EINVAL;
-    
+
     // Setup a target object with the target name
     iSCSIMutableTargetRef target = iSCSITargetCreateMutable();
     iSCSITargetSetIQN(target,targetIQN);
-    
+
     // Generate data to transmit (no longer need target object after this)
     CFDataRef targetData = iSCSITargetCreateData(target);
     iSCSITargetRelease(target);
-    
+
     CFDataRef portalData = iSCSIPortalCreateData(portal);
-    
+
     // Create command header to transmit
     iSCSIDMsgQueryTargetForAuthMethodCmd cmd = iSCSIDMsgQueryTargetForAuthMethodCmdInit;
     cmd.portalLength = (UInt32)CFDataGetLength(portalData);
     cmd.targetLength = (UInt32)CFDataGetLength(targetData);
-    
+
     if(iSCSIDaemonSendMsg(handle,(iSCSIDMsgGeneric *)&cmd,targetData,portalData,NULL))
     {
         CFRelease(portalData);
@@ -393,13 +394,13 @@ errno_t iSCSIDaemonQueryTargetForAuthMethod(iSCSIDaemonHandle handle,
     CFRelease(portalData);
     CFRelease(targetData);
     iSCSIDMsgQueryTargetForAuthMethodRsp rsp;
-    
+
     if(recv(handle,&rsp,sizeof(rsp),0) != sizeof(rsp))
         return EIO;
-    
+
     *authMethod = rsp.authMethod;
     *statusCode = rsp.statusCode;
-    
+
     return rsp.errorCode;
 }
 
@@ -426,16 +427,16 @@ CFArrayRef iSCSIDaemonCreateArrayOfActiveTargets(iSCSIDaemonHandle handle)
 
     if(!error)
         error = iSCSIDaemonRecvMsg(handle,(iSCSIDMsgGeneric*)&rsp,NULL);
-    
+
     if(!error) {
         CFDataRef data = NULL;
         error = iSCSIDaemonRecvMsg(handle,0,&data,rsp.dataLength,NULL);
-        
+
         if(!error && data) {
             CFPropertyListFormat format;
             activeTargets = CFPropertyListCreateWithData(kCFAllocatorDefault,data,0,&format,NULL);
             CFRelease(data);
-            
+
             if(format != kCFPropertyListBinaryFormat_v1_0) {
                 if(activeTargets) {
                     CFRelease(activeTargets);
@@ -467,9 +468,9 @@ CFArrayRef iSCSIDaemonCreateArrayOfActivePortalsForTarget(iSCSIDaemonHandle hand
 
     if(send(handle,&cmd,sizeof(cmd),0) != sizeof(cmd))
         error = EIO;
-    
+
     iSCSIDMsgCreateArrayOfActivePortalsForTargetRsp rsp;
-    
+
     if(!error)
         error = iSCSIDaemonRecvMsg(handle,(iSCSIDMsgGeneric*)&rsp,NULL);
 
@@ -523,11 +524,11 @@ CFDictionaryRef iSCSIDaemonCreateCFPropertiesForSession(iSCSIDaemonHandle handle
 
     if(!error)
         error = iSCSIDaemonRecvMsg(handle,(iSCSIDMsgGeneric*)&rsp,NULL);
-    
+
     if(!error) {
         CFDataRef data = NULL;
         error = iSCSIDaemonRecvMsg(handle,0,&data,rsp.dataLength,NULL);
-        
+
         if(!error && data) {
             CFPropertyListFormat format;
             properties = CFPropertyListCreateWithData(kCFAllocatorDefault,data,0,&format,NULL);
@@ -569,14 +570,14 @@ CFDictionaryRef iSCSIDaemonCreateCFPropertiesForConnection(iSCSIDaemonHandle han
     CFRelease(portalData);
 
     iSCSIDMsgCreateCFPropertiesForConnectionRsp rsp;
-    
+
     if(!error)
         error = iSCSIDaemonRecvMsg(handle,(iSCSIDMsgGeneric*)&rsp,NULL);
-    
+
     if(!error) {
         CFDataRef data = NULL;
         error = iSCSIDaemonRecvMsg(handle,0,&data,rsp.dataLength,NULL);
-        
+
         if(!error && data) {
             CFPropertyListFormat format;
             properties = CFPropertyListCreateWithData(kCFAllocatorDefault,data,0,&format,NULL);
@@ -627,34 +628,34 @@ errno_t iSCSIDaemonPreferencesIOLockAndSync(iSCSIDaemonHandle handle,
     //  Send in authorization and acquire lock
     AuthorizationExternalForm authExtForm;
     AuthorizationMakeExternalForm(authorization,&authExtForm);
-    
+
     CFDataRef authData = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
                                                      (UInt8*)authExtForm.bytes,
                                                      kAuthorizationExternalFormLength,
                                                      kCFAllocatorDefault);
-    
+
     iSCSIDMsgPreferencesIOLockAndSyncCmd cmd = iSCSIDMsgPreferencesIOLockAndSyncCmdInit;
     cmd.authorizationLength = (UInt32)CFDataGetLength(authData);
-    
+
     errno_t error = iSCSIDaemonSendMsg(handle,(iSCSIDMsgGeneric *)&cmd,authData,NULL);
-    
+
     if(error)
         return error;
-    
+
     iSCSIDMsgPreferencesIOLockAndSyncRsp rsp;
-    
+
     if(recv(handle,&rsp,sizeof(rsp),0) != sizeof(rsp))
         return EIO;
-    
+
     if(rsp.funcCode != kiSCSIDPreferencesIOLockAndSync)
         return EIO;
-    
+
     if(rsp.errorCode == 0) {
         // Force preferences to synchronize after obtaining lock
         // (this ensures that the client has the most up-to-date preferences data)
         iSCSIPreferencesUpdateWithAppValues(preferences);
     }
-    
+
     return rsp.errorCode;
 }
 
@@ -671,34 +672,34 @@ errno_t iSCSIDaemonPreferencesIOUnlockAndSync(iSCSIDaemonHandle handle,
     // Validate inputs
     if(handle < 0)
         return EINVAL;
-    
+
     CFDataRef preferencesData = NULL;
-    
+
     iSCSIDMsgPreferencesIOUnlockAndSyncCmd cmd = iSCSIDMsgPreferencesIOUnlockAndSyncCmdInit;
-    
+
     if(preferences) {
         preferencesData = iSCSIPreferencesCreateData(preferences);
         cmd.preferencesLength = (UInt32)CFDataGetLength(preferencesData);
     }
     else
         cmd.preferencesLength = 0;
-    
+
     errno_t error = iSCSIDaemonSendMsg(handle,(iSCSIDMsgGeneric *)&cmd,preferencesData,NULL);
-    
+
     if(preferencesData)
         CFRelease(preferencesData);
-    
+
     if(error)
         return error;
-    
+
     iSCSIDMsgPreferencesIOUnlockAndSyncRsp rsp;
-    
+
     if(recv(handle,&rsp,sizeof(rsp),0) != sizeof(rsp))
         return EIO;
-    
+
     if(rsp.funcCode != kiSCSIDPreferencesIOUnlockAndSync)
         return EIO;
-    
+
     return rsp.errorCode;
 }
 
@@ -716,40 +717,40 @@ errno_t iSCSIDaemonSetSharedSecret(iSCSIDaemonHandle handle,
     // Validate inputs
     if(handle < 0 || !authorization || !nodeIQN || !sharedSecret)
         return EINVAL;
-    
+
     AuthorizationExternalForm authExtForm;
     AuthorizationMakeExternalForm(authorization,&authExtForm);
-    
+
     CFDataRef authData = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
                                                      (UInt8*)&authExtForm.bytes,
                                                      kAuthorizationExternalFormLength,
                                                      kCFAllocatorDefault);
-    
+
     CFDataRef nodeIQNData = CFStringCreateExternalRepresentation(kCFAllocatorDefault,nodeIQN,kCFStringEncodingASCII,0);
     CFDataRef sharedSecretData = CFStringCreateExternalRepresentation(kCFAllocatorDefault,sharedSecret,kCFStringEncodingASCII,0);
-    
+
     iSCSIDMsgSetSharedSecretCmd cmd = iSCSIDMsgSetSharedSecretCmdInit;
     cmd.authorizationLength = (UInt32)CFDataGetLength(authData);
     cmd.nodeIQNLength = (UInt32)CFDataGetLength(nodeIQNData);
     cmd.secretLength = (UInt32)CFDataGetLength(sharedSecretData);
-    
+
     errno_t error = iSCSIDaemonSendMsg(handle,(iSCSIDMsgGeneric *)&cmd,
                                        authData,nodeIQNData,sharedSecretData,NULL);
-    
+
     if(nodeIQNData)
         CFRelease(nodeIQNData);
-    
+
     if(sharedSecretData)
         CFRelease(sharedSecretData);
 
     if(error)
         return error;
-    
+
     iSCSIDMsgSetSharedSecretRsp rsp;
-    
+
     if(recv(handle,&rsp,sizeof(rsp),0) != sizeof(rsp))
         return EIO;
-    
+
     if(rsp.funcCode != kiSCSIDSetSharedSecret)
         return EIO;
 
@@ -768,39 +769,39 @@ errno_t iSCSIDaemonRemoveSharedSecret(iSCSIDaemonHandle handle,
     // Validate inputs
     if(handle < 0 || !authorization || !nodeIQN)
         return EINVAL;
-    
+
     AuthorizationExternalForm authExtForm;
     AuthorizationMakeExternalForm(authorization,&authExtForm);
-    
+
     CFDataRef authData = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
                                                      (UInt8*)&authExtForm.bytes,
                                                      kAuthorizationExternalFormLength,
                                                      kCFAllocatorDefault);
-    
+
     CFDataRef nodeIQNData = CFStringCreateExternalRepresentation(kCFAllocatorDefault,nodeIQN,kCFStringEncodingASCII,'0');
-    
+
     iSCSIDMsgRemoveSharedSecretCmd cmd = iSCSIDMsgRemoveSharedSecretCmdInit;
     cmd.authorizationLength = (UInt32)CFDataGetLength(authData);
     cmd.nodeIQNLength = (UInt32)CFDataGetLength(nodeIQNData);
-    
+
     errno_t error = iSCSIDaemonSendMsg(handle,(iSCSIDMsgGeneric *)&cmd,
                                        authData,nodeIQNData,NULL);
-    
+
     if(nodeIQNData)
         CFRelease(nodeIQNData);
-    
+
     if(error)
         return error;
-    
+
     iSCSIDMsgRemoveSharedSecretRsp rsp;
-    
+
     if(recv(handle,&rsp,sizeof(rsp),0) != sizeof(rsp))
         return EIO;
-    
+
     if(rsp.funcCode != kiSCSIDRemoveSharedSecret)
         return EIO;
-    
-    
+
+
     return rsp.errorCode;
 }
 

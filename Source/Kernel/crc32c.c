@@ -8,11 +8,11 @@
  This software is provided 'as-is', without any express or implied
  warranty.  In no event will the author be held liable for any damages
  arising from the use of this software.
- 
+
  Permission is granted to anyone to use this software for any purpose,
  including commercial applications, and to alter it and redistribute it
  freely, subject to the following restrictions:
- 
+
  1. The origin of this software must not be misrepresented; you must not
  claim that you wrote the original software. If you use this software
  in a product, an acknowledgment in the product documentation would be
@@ -20,7 +20,7 @@
  2. Altered source versions must be plainly marked as such, and must not be
  misrepresented as being the original software.
  3. This notice may not be removed or altered from any source distribution.
- 
+
  Mark Adler
  madler@alumni.caltech.edu
  */
@@ -48,7 +48,7 @@
 static inline uint32_t gf2_matrix_times(uint32_t *mat, uint32_t vec)
 {
     uint32_t sum;
-    
+
     sum = 0;
     while (vec) {
         if (vec & 1)
@@ -64,7 +64,7 @@ static inline uint32_t gf2_matrix_times(uint32_t *mat, uint32_t vec)
 static inline void gf2_matrix_square(uint32_t *square, uint32_t *mat)
 {
     int n;
-    
+
     for (n = 0; n < 32; n++)
         square[n] = gf2_matrix_times(mat, mat[n]);
 }
@@ -79,7 +79,7 @@ static void crc32c_zeros_op(uint32_t *even, size_t len)
     int n;
     uint32_t row;
     uint32_t odd[32];       /* odd-power-of-two zeros operator */
-    
+
     /* put operator for one zero bit in odd */
     odd[0] = POLY;              /* CRC-32C polynomial */
     row = 1;
@@ -87,13 +87,13 @@ static void crc32c_zeros_op(uint32_t *even, size_t len)
         odd[n] = row;
         row <<= 1;
     }
-    
+
     /* put operator for two zero bits in even */
     gf2_matrix_square(even, odd);
-    
+
     /* put operator for four zero bits in odd */
     gf2_matrix_square(odd, even);
-    
+
     /* first square will put the operator for one zero byte (eight zero bits),
      in even -- next square puts operator for two zero bytes in odd, and so
      on, until len has been rotated down to zero */
@@ -105,7 +105,7 @@ static void crc32c_zeros_op(uint32_t *even, size_t len)
         gf2_matrix_square(odd, even);
         len >>= 1;
     } while (len);
-    
+
     /* answer ended up in odd -- copy to even */
     for (n = 0; n < 32; n++)
         even[n] = odd[n];
@@ -117,7 +117,7 @@ static void crc32c_zeros(uint32_t zeros[][256], size_t len)
 {
     uint32_t n;
     uint32_t op[32];
-    
+
     crc32c_zeros_op(op, len);
     for (n = 0; n < 256; n++) {
         zeros[0][n] = gf2_matrix_times(op, n);
@@ -161,14 +161,14 @@ uint32_t crc32c(uint32_t crc,const void * buf,size_t len)
     // NS modification - return initial value if buffer empty
     if(!len || !buf)
         return crc;
-    
+
     const unsigned char *next = (const unsigned char *)buf;
     const unsigned char *end;
     uint64_t crc0, crc1, crc2;      /* need to be 64 bits for crc32q */
-    
+
     /* pre-process the crc */
     crc0 = crc ^ 0xffffffff;
-    
+
     /* compute the crc for up to seven leading bytes to bring the data pointer
      to an eight-byte boundary */
     while (len && ((uintptr_t)next & 7) != 0) {
@@ -178,7 +178,7 @@ uint32_t crc32c(uint32_t crc,const void * buf,size_t len)
         next++;
         len--;
     }
-    
+
     /* compute the crc on sets of LONG*3 bytes, executing three independent crc
      instructions, each on LONG bytes -- this is optimized for the Nehalem,
      Westmere, Sandy Bridge, and Ivy Bridge architectures, which have a
@@ -200,7 +200,7 @@ uint32_t crc32c(uint32_t crc,const void * buf,size_t len)
         next += LONG*2;
         len -= LONG*3;
     }
-    
+
     /* do the same thing, but now on SHORT*3 blocks for the remaining data less
      than a LONG*3 block */
     while (len >= SHORT*3) {
@@ -220,7 +220,7 @@ uint32_t crc32c(uint32_t crc,const void * buf,size_t len)
         next += SHORT*2;
         len -= SHORT*3;
     }
-    
+
     /* compute the crc on the remaining eight-byte units less than a SHORT*3
      block */
     end = next + (len - (len & 7));
@@ -231,7 +231,7 @@ uint32_t crc32c(uint32_t crc,const void * buf,size_t len)
         next += 8;
     }
     len &= 7;
-    
+
     /* compute the crc for up to seven trailing bytes */
     while (len) {
         __asm__("crc32b\t" "(%1), %0"
@@ -240,7 +240,7 @@ uint32_t crc32c(uint32_t crc,const void * buf,size_t len)
         next++;
         len--;
     }
-    
+
     /* return a post-processed crc */
     return (uint32_t)crc0 ^ 0xffffffff;
 }

@@ -42,11 +42,11 @@ errno_t iSCSISessionLoginSingleQuery(struct iSCSILoginQueryContext * context,
     cmd.ISIDd = CFSwapInt16HostToBig(context->sessionId);
     cmd.loginStage  = (context->nextStage << kiSCSIPDULoginNSGBitOffset);
     cmd.loginStage |= (context->currentStage << kiSCSIPDULoginCSGBitOffset);
-    
+
     // If stages aren't the same then we are going to transition
     if(context->currentStage != context->nextStage)
         cmd.loginStage |= kiSCSIPDULoginTransitFlag;
-    
+
     // Create a data segment based on text commands (key-value pairs)
     void * data = NULL;
     size_t length = 0;
@@ -55,14 +55,14 @@ errno_t iSCSISessionLoginSingleQuery(struct iSCSILoginQueryContext * context,
     errno_t error = iSCSIHBAInterfaceSend(context->interface,context->sessionId,context->connectionId,
                                           (iSCSIPDUInitiatorBHS *)&cmd,data,length);
     iSCSIPDUDataRelease(&data);
-    
+
     if(error) {
         return error;
     }
-    
+
     // Get response from iSCSI portal, continue until response is complete
     iSCSIPDULoginRspBHS rsp;
-    
+
     do {
         if((error = iSCSIHBAInterfaceReceive(context->interface,context->sessionId,context->connectionId,
                                              (iSCSIPDUTargetBHS *)&rsp,&data,&length)))
@@ -70,7 +70,7 @@ errno_t iSCSISessionLoginSingleQuery(struct iSCSILoginQueryContext * context,
             iSCSIPDUDataRelease(&data);
             return error;
         }
-        
+
         if(rsp.opCode == kiSCSIPDUOpCodeLoginRsp)
         {
             // Per RFC3720, the status and detail together make up the code
@@ -79,14 +79,14 @@ errno_t iSCSISessionLoginSingleQuery(struct iSCSILoginQueryContext * context,
 
             if(*statusCode != kiSCSILoginSuccess)
                 break;
-            
+
             iSCSIPDUDataParseToDict(data,length,textRsp);
-            
+
             // Save & return the TSIH if this is the leading login
             if(context->targetSessionId == 0 && context->nextStage == kiSCSIPDUFullFeaturePhase) {
                 context->targetSessionId = CFSwapInt16BigToHost(rsp.TSIH);
             }
-            
+
             // Save the status sequence number and expected
             // command sequence number
             context->statSN = rsp.statSN;
@@ -101,7 +101,7 @@ errno_t iSCSISessionLoginSingleQuery(struct iSCSILoginQueryContext * context,
         }
     }
     while(rsp.loginStage & kiSCSIPDUTextReqContinueFlag);
-    
+
     iSCSIPDUDataRelease(&data);
     return error;
 }
@@ -131,11 +131,11 @@ errno_t iSCSISessionLoginQuery(struct iSCSILoginQueryContext * context,
 {
     // Try a single query first
     errno_t error = iSCSISessionLoginSingleQuery(context,statusCode,rejectCode,textCmd,textRsp);
-    
+
     // If error occured, do nothing
     if(error || *statusCode != kiSCSILoginSuccess)
         return error;
-    
+
     // If we are not transitioning stages, or we are and the target agreed to
     // transition, then we can move on...
     if(context->currentStage == context->nextStage || context->transitNextStage)
@@ -146,21 +146,21 @@ errno_t iSCSISessionLoginQuery(struct iSCSILoginQueryContext * context,
     // (with a maximum count specified below).  See RFC3720 at Section 5.4.
     CFIndex maxRetryCount = 5;
     CFIndex retryCount = 0;
-    
+
     for(retryCount = 0; retryCount < maxRetryCount; retryCount++)
     {
         // Retries are blank, to get target to advance (per RFC3720)
         error = iSCSISessionLoginSingleQuery(context,statusCode,rejectCode,NULL,NULL);
-        
+
         if(context->transitNextStage)
             break;
     }
-    
+
     // If the target refuses to advance after max. retry count,
     // set an iSCSI error and quit
     if(retryCount == maxRetryCount)
         *statusCode = kiSCSILoginInvalidReqDuringLogin;
-    
+
     return error;
 }
 
@@ -185,25 +185,25 @@ errno_t iSCSISessionTextQuery(SessionIdentifier sessionId,
     // Create a new login request basic header segment
     iSCSIPDUTextReqBHS cmd = iSCSIPDUTextReqBHSInit;
     cmd.textReqStageFlags = 0;
-    
+
     // Create a data segment based on text commands (key-value pairs)
     void * data;
     size_t length;
     iSCSIPDUDataCreateFromDict(textCmd,&data,&length);
-    
+
     errno_t error = iSCSIHBAInterfaceSend(0,sessionId,
                                     connectionId,
                                     (iSCSIPDUInitiatorBHS *)&cmd,
                                     data,length);
     iSCSIPDUDataRelease(&data);
-    
+
     if(error) {
         return error;
     }
-    
+
     // Get response from iSCSI portal, continue until response is complete
     iSCSIPDUTextRspBHS rsp;
-    
+
     do {
         if((error = iSCSIHBAInterfaceReceive(0,sessionId,connectionId,
                                     (iSCSIPDUTargetBHS *)&rsp,&data,&length)))
@@ -211,10 +211,10 @@ errno_t iSCSISessionTextQuery(SessionIdentifier sessionId,
             iSCSIPDUDataRelease(&data);
             return error;
         }
-        
+
         if(rsp.opCode == kiSCSIPDUOpCodeTextRsp)
             iSCSIPDUDataParseToDict(data,length,textRsp);
-        
+
         // For this case some other kind of PDU or invalid data was received
         else if(rsp.opCode == kiSCSIPDUOpCodeReject)
         {
@@ -223,7 +223,7 @@ errno_t iSCSISessionTextQuery(SessionIdentifier sessionId,
         }
     }
     while(rsp.textReqStageBits & kiSCSIPDUTextReqContinueFlag);
-    
+
     iSCSIPDUDataRelease(&data);
     return error;
 }

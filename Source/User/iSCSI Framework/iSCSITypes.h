@@ -88,29 +88,29 @@ typedef CFTypeRef iSCSITypeRef;
 
 /*! Error recovery levels. */
 enum iSCSIErrorRecoveryLevels {
-    
+
     /*! Recovery of a session. */
     kiSCSIErrorRecoverySession = 0,
-    
+
     /*! Recovery of a digest. */
     kiSCSIErrorRecoveryDigest = 1,
-    
+
     /*! Recovery of a connection. */
     kiSCSIErrorRecoveryConnection = 2,
-    
+
     /*! Invalid error recovery level. */
     kiSCSIErrorRecoveryInvalid
 };
 
 /*! Valid iSCSI authentication methods. */
 enum iSCSIAuthMethods {
-    
+
     /*! No authentication. */
     kiSCSIAuthMethodNone = 0,
-    
+
     /*! CHAP authentication. */
-    kiSCSIAuthMethodCHAP = 1, 
-    
+    kiSCSIAuthMethodCHAP = 1,
+
     /*! Invalid authentication method. */
     kiSCSIAuthMethodInvalid
 };
@@ -130,80 +130,80 @@ enum iSCSIDigestTypes {
 
 /*! Detailed login response from a target. */
 enum iSCSILoginStatusCode {
-    
+
     /*! Login was successful. */
     kiSCSILoginSuccess = 0x0000,
-    
+
     /*! The target has been temporarily moved. */
     kiSCSILoginTargetMovedTemp = 0x0101,
-    
+
     /*! The target has been permanently moved. */
     kiSCSILoginTargetMovedPerm = 0x0102,
-    
+
     /*! An initiator error has occured. */
     kiSCSILoginInitiatorError = 0x0200,
-    
+
     /*! Authentication has failed. */
     kiSCSILoginAuthFail = 0x0201,
-    
+
     /*! Access was denied. */
     kiSCSILoginAccessDenied = 0x0202,
-    
+
     /*! THe target was not found. */
     kiSCSILoginNotFound = 0x0203,
-    
+
     /*! The target has been removed. */
     kiSCSILoginTargetRemoved = 0x0204,
-    
+
     /*! Unsupported iSCSI protocol version. */
     kiSCSILoginUnsupportedVer = 0x0205,
-    
+
     /*! Too many connections. */
     kiSCSILoginTooManyConnections = 0x0206,
-    
+
     /*! Missing login parameters. */
     kiSCSILoginMissingParam = 0x0207,
-    
+
     /*! Cannot include connection in this sesssion. */
     kiSCSILoginCantIncludeInSeession = 0x0208,
-    
+
     /*! The requested session type is unsupported. */
     kiSCSILoginSessionTypeUnsupported = 0x0209,
-    
+
     /*! The requested session does not exist. */
     kiSCSILoginSessionDoesntExist = 0x020a,
-    
+
     /*! Invalid request during login. */
     kiSCSILoginInvalidReqDuringLogin = 0x020b,
-    
+
     /*! A target hardware or software error has occurred. */
     kiSCSILoginTargetHWorSWError = 0x0300,
-    
+
     /*! Login service is unavailable. */
     kiSCSILoginServiceUnavailable = 0x0301,
-    
+
     /*! Out of resources. */
     kiSCSILoginOutOfResources = 0x0302,
-    
+
     /*! An invalid login status code. */
     kiSCSILoginInvalidStatusCode
 };
 
 /*! Detailed logout response from a target. */
 enum iSCSILogoutStatusCode {
-    
+
     /*! Login was successful. */
     kiSCSILogoutSuccess = 0x0000,
-    
+
     /*! The connection identifier was not found. */
     kiSCSILogoutCIDNotFound = 0x0001,
-    
+
     /*! Recovery is not supported for this session. */
     kiSCSILogoutRecoveryNotSupported = 0x0002,
-    
+
     /*! Cleanup of the connection resources failed. */
     kiSCSILogoutCleanupFailed = 0x0003,
-    
+
     /*! Invalid status code. */
     kiSCSILogoutInvalidStatusCode
 };
@@ -247,7 +247,7 @@ void iSCSIPortalSetAddress(iSCSIMutablePortalRef portal,CFStringRef address);
  *  @return the port associated with the portal or NULL if the portal is invalid. */
 CFStringRef iSCSIPortalGetPort(iSCSIPortalRef portal);
 
-/*! Sets the port associated with the iSCSI portal.  This function has no 
+/*! Sets the port associated with the iSCSI portal.  This function has no
  *  effect if the portal name is blank.
  *  @param portal an iSCSI portal object.
  *  @param port the port to associate with the specified portal. */
@@ -340,7 +340,7 @@ iSCSITargetRef iSCSITargetCreateWithDictionary(CFDictionaryRef dict);
 
 /*! Copies a target object to a dictionary representation.
  *  @param target an iSCSI target object.
- *  @return a dictionary representation of the target or 
+ *  @return a dictionary representation of the target or
  *  NULL if target is invalid. */
 CFDictionaryRef iSCSITargetCreateDictionary(iSCSITargetRef target);
 
@@ -361,7 +361,7 @@ iSCSIAuthRef iSCSIAuthCreateNone(void);
  * @return an iSCSI authentication object or NULL if object creation failed */
 iSCSIAuthRef iSCSIAuthCreateWithData(CFDataRef data);
 
-/*! Creates a new iSCSIAuth object for CHAP authentication. This function will 
+/*! Creates a new iSCSIAuth object for CHAP authentication. This function will
  *  fail to return an authentication object if both parameters are not specified.
  *  @param name the name for CHAP.
  *  @param sharedSecret the shared CHAP secret.
@@ -413,7 +413,7 @@ iSCSIMutableDiscoveryRecRef iSCSIDiscoveryRecCreateMutableWithData(CFDataRef dat
  * @return an iSCSI discovery object or NULL if object creation failed. */
 iSCSIDiscoveryRecRef iSCSIDiscoveryRecCreateWithDictionary(CFDictionaryRef dict);
 
-/*! Add a portal to a specified portal group tag for a given target.  If the 
+/*! Add a portal to a specified portal group tag for a given target.  If the
  *  target does not exist, it is added to the discovery record.
  *  @param discoveryRec the discovery record.
  *  @param targetIQN the name of the target to add.
@@ -446,7 +446,7 @@ CFArrayRef iSCSIDiscoveryRecCreateArrayOfPortalGroupTags(iSCSIDiscoveryRecRef di
                                                          CFStringRef targetIQN);
 
 /*! Gets all of the portals associated with a partiular target and portal
- *  group tag.  
+ *  group tag.
  *  @param discoveryRec the discovery record.
  *  @param targetIQN the name of the target.
  *  @param portalGroupTag the portal group tag associated with the target.
